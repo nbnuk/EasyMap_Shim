@@ -1,0 +1,34 @@
+#env setup
+
+virtualenv ENV -p python3
+source ENV/bin/activate
+pip install tornado
+pip install pyproj
+pip install pillow
+
+#Test bbox load
+
+from loadbboxes import bboxFor
+
+bboxes={}
+bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl2'))  #UK Countries
+bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl14')) #UK Vice Counties
+print(bboxes)
+
+#Test image load
+
+from loadimage import imageFor
+from PIL import Image
+
+lon0=-22728.023937243855
+lat0=6574276.207484908
+lon1=92938.35891334235
+lat1=6647418.724732596
+dpt=8000
+
+url="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
+url="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:NHMSYS0000080188&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:true;gridres:singlegrid"
+img=imageFor(url, lon0, lat0, lon1, lat1, 2048, 2048, dpt)
+img.thumbnail((512,512), Image.LINEAR)
+img.save( 'test.png', 'PNG' )
+
