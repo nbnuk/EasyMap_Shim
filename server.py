@@ -24,12 +24,12 @@ class requestHandler(tornado.web.RequestHandler):
       dpt=800000
 
       url1="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
-      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:NHMSYS0000080188&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:false;gridres:singlegrid"
+      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+"&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:false;gridres:singlegrid"
       img1=imageFor(url1, lon0, lat0, lon1, lat1, 1024, 1024, dpt)
       img1.thumbnail((312,312), Image.LINEAR)
       img2=imageFor(url2, lon0, lat0, lon1, lat1, 1024, 1024, dpt)
       img2.thumbnail((312,312), Image.LINEAR)
-      img3 = Image.blend(img1, img2, alpha=0.5)
+      img3 = Image.blend(img1, img2, alpha=0.65)
       img4 = ImageEnhance.Contrast(img3).enhance(2)
       img4.save( 'tmp.png', 'PNG' )
 
