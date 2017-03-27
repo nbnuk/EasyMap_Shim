@@ -14,14 +14,16 @@ import re
 
 class requestHandler(tornado.web.RequestHandler):
    def get(self):
+
       def clamp(n, smallest, largest): return max(smallest, min(n, largest))
+
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
 
       vc = self.get_argument('vc',default='')
       vc = re.sub(r'[^0-9]', '', vc) #sanitise
       zoom = self.get_argument('zoom',default='England')
-      zoom = re.sub(r'[^a-zA-Z]', '', zoom).lower() #sanitise
+      zoom = re.sub(r'[^a-zA-Z\-]', '', zoom).lower() #sanitise
       if vc=='':
          vc=zoom
       (lon0,lat0,lon1,lat1)=bboxes[vc]
@@ -49,10 +51,13 @@ class requestHandler(tornado.web.RequestHandler):
 
       url1="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
       url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+"&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:false;gridres:singlegrid"
+      #Supersampling 
+      #img1=imageFor(url1, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
+      #img1.thumbnail((img1.size[0]/2,img1.size[1]/2), Image.LINEAR)
+      #img2=imageFor(url2, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
+      #img2.thumbnail((img2.size[0]/2,img2.size[1]/2), Image.LINEAR)
       img1=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt)
-      #img1.thumbnail((img1.size[0]/4,img1.size[1]/4), Image.LINEAR)
       img2=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt)
-      #img2.thumbnail((img2.size[0]/4,img2.size[1]/4), Image.LINEAR)
       img3 = Image.blend(img1, img2, alpha=0.65)
       img4 = ImageEnhance.Contrast(img3).enhance(2)
       img4.save( 'tmp.png', 'PNG' )
@@ -67,10 +72,15 @@ application = tornado.web.Application([
    (r'/EasyMap', requestHandler),
 ])
 
-#Load tables
+#Load vc/zoom tables
 bboxes={}
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl2'))  #UK Countries
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl14')) #UK Vice Counties
+#and some more I looked up by hand on google earth (gps->epsg:3857)
+bboxes.update({'highland':(-775130.5274544959, 7630301.682472427, -308177.99150700646, 8134127.260152808)})
+bboxes.update({'sco-mainland':(-734225.0673675996, 7278475.738469875, -176279.97964568838, 8118784.824617484)})
+bboxes.update({'outer-heb':(-964621.4589895669, 7687560.282221712, -675534.4261951343, 8092442.674175756)})
+#Load (cached) data source table
 druid=allUidForGuid()
 
 if __name__ == "__main__":
