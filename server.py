@@ -22,7 +22,7 @@ class requestHandler(tornado.web.RequestHandler):
 
       vc = self.get_argument('vc',default='')
       vc = re.sub(r'[^0-9]', '', vc) #sanitise
-      zoom = self.get_argument('zoom',default='England')
+      zoom = self.get_argument('zoom',default='UK')
       zoom = re.sub(r'[^a-zA-Z\-]', '', zoom).lower() #sanitise
       if vc=='':
          vc=zoom
@@ -80,6 +80,8 @@ bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl14')) #UK Vice C
 bboxes.update({'highland':(-775130.5274544959, 7630301.682472427, -308177.99150700646, 8134127.260152808)})
 bboxes.update({'sco-mainland':(-734225.0673675996, 7278475.738469875, -176279.97964568838, 8118784.824617484)})
 bboxes.update({'outer-heb':(-964621.4589895669, 7687560.282221712, -675534.4261951343, 8092442.674175756)})
+bboxes.update({'uk':(-1208316.543132066, 6415818.406144551, 225030.61127155885, 8284550.873660544)})
+
 #Load (cached) data source table
 druid=allUidForGuid()
 
