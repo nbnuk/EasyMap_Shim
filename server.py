@@ -36,14 +36,19 @@ class requestHandler(tornado.web.RequestHandler):
                druidurl=druidurl+'+OR+data_resource_uid:'+druid[dsk]
          druidurl=druidurl+')'
 
+      w = self.get_argument('w','-1')
+      w = int(re.sub(r'[^\-0-9]', '', w)) #sanitise
+      h = self.get_argument('h','-1')
+      h = int(re.sub(r'[^\-0-9]', '', h)) #sanitise
+
       dpt=800000
 
       url1="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
       url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+"&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:false;gridres:singlegrid"
-      img1=imageFor(url1, lon0, lat0, lon1, lat1, 1024, -1, dpt)
-      img1.thumbnail((img1.size[0]/4,img1.size[1]/4), Image.LINEAR)
-      img2=imageFor(url2, lon0, lat0, lon1, lat1, 1024, -1, dpt)
-      img2.thumbnail((img2.size[0]/4,img2.size[1]/4), Image.LINEAR)
+      img1=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt)
+      #img1.thumbnail((img1.size[0]/4,img1.size[1]/4), Image.LINEAR)
+      img2=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt)
+      #img2.thumbnail((img2.size[0]/4,img2.size[1]/4), Image.LINEAR)
       img3 = Image.blend(img1, img2, alpha=0.65)
       img4 = ImageEnhance.Contrast(img3).enhance(2)
       img4.save( 'tmp.png', 'PNG' )
@@ -55,7 +60,7 @@ class requestHandler(tornado.web.RequestHandler):
 #      os.remove('tmp.png')
 
 application = tornado.web.Application([
-   (r'/', requestHandler),
+   (r'/EasyMap', requestHandler),
 ])
 
 #Load tables
