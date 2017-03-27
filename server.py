@@ -26,15 +26,25 @@ class requestHandler(tornado.web.RequestHandler):
       vc = re.sub(r'[^0-9]', '', vc) #sanitise
       zoom = self.get_argument('zoom',default='UK')
       zoom = re.sub(r'[^a-zA-Z\-]', '', zoom).lower() #sanitise
-      if vc=='':
-         vc=zoom
+      if vc=='': vc=zoom
       (lon0,lat0,lon1,lat1)=bboxes[vc]
 
       bl = self.get_argument('bl',default=False) 
       tr = self.get_argument('tr',default=False)
       if bl and tr:
+         bl = re.sub(r'[^a-zA-Z0-9]', '', bl) #sanitise
+         tr = re.sub(r'[^a-zA-Z0-9]', '', tr) #sanitise
          (lon0,lat0)=GR_to_EPSG3857(bl)
          (lon1,lat1)=GR_to_EPSG3857(tr)
+
+      blCoord = self.get_argument('blCoord',default=False)
+      trCoord = self.get_argument('trCoord',default=False)
+      if blCoord and trCoord:
+         blCoord = re.sub(r'[^0-9,]', '', blCoord).split(',') #sanitise
+         trCoord = re.sub(r'[^0-9,]', '', trCoord).split(',') #sanitise
+         if len(blCoord)==2 and len(trCoord)==2:
+            (lon0,lat0)=NE_to_EPSG3857(blCoord)
+            (lon1,lat1)=NE_to_EPSG3857(trCoord)
 
       ds = self.get_argument('ds','')
       ds = re.sub(r'[^a-zA-Z0-9,]', '', ds) #sanitise

@@ -3,12 +3,12 @@ from pyproj import Proj, transform
 EPSG3857=Proj(init='epsg:3857')
 EPSG27700=Proj(init='epsg:27700')
 
-def NE_to_EPSG3857(N,E):
-   return transform(EPSG27700, EPSG3857, N, E)
+def NE_to_EPSG3857(NE):
+   return transform(EPSG27700, EPSG3857, NE[0], NE[1])
 
 def GR_to_EPSG3857(GR):
-   (N,E)=GR_to_NE(GR)
-   return NE_to_EPSG3857(N,E)
+   NE=GR_to_NE(GR)
+   return NE_to_EPSG3857(NE)
 
 #GR_to_NE is not verbatim as the version on the os website has a bug (as below). Also, integer division fixed for python3.
 #https://www.ordnancesurvey.co.uk/business-and-government/help-and-support/web-services/os-openspace/tutorials/bill-chadwick-eastings-and-northings-from-grid-reference.html
