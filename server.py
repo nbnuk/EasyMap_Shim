@@ -7,6 +7,8 @@ from loadbboxes import bboxFor
 
 from loaddatasources import allUidForGuid
 
+from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857
+
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
@@ -27,6 +29,12 @@ class requestHandler(tornado.web.RequestHandler):
       if vc=='':
          vc=zoom
       (lon0,lat0,lon1,lat1)=bboxes[vc]
+
+      bl = self.get_argument('bl',default=False) 
+      tr = self.get_argument('tr',default=False)
+      if bl and tr:
+         (lon0,lat0)=GR_to_EPSG3857(bl)
+         (lon1,lat1)=GR_to_EPSG3857(tr)
 
       ds = self.get_argument('ds','')
       ds = re.sub(r'[^a-zA-Z0-9,]', '', ds) #sanitise
@@ -87,7 +95,7 @@ druid=allUidForGuid()
 
 if __name__ == "__main__":
    http_server = tornado.httpserver.HTTPServer(application)
-   http_server.listen(8100)
+   http_server.listen(8200)
    loop=tornado.ioloop.IOLoop.instance()
 loop.start()
 
