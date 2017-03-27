@@ -21,15 +21,19 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
          img_width=350
          img_height=350
 
-      if img_width<img_height:
-         degrees_per_pixel_lon=dlon/img_width
-         if img_height==-1: img_height=int(dlat/degrees_per_pixel_lon)
-         tilesize=int(degrees_per_tile/degrees_per_pixel_lon)
+      degrees_per_pixel_lon=dlon/img_width
+      degrees_per_pixel_lat=dlat/img_height
+      
+      if img_width==-1:
+         degrees_per_pixel=degrees_per_pixel_lat
+         img_width=int(dlon/degrees_per_pixel)
+      elif img_height==-1:
+         degrees_per_pixel=degrees_per_pixel_lon
+         img_height=int(dlat/degrees_per_pixel)
+      else:
+         degrees_per_pixel=max(degrees_per_pixel_lon,degrees_per_pixel_lat)
 
-      else: #imgwidth>=img_height
-         degrees_per_pixel_lat=dlat/img_height
-         if img_width==-1: img_width=int(dlon/degrees_per_pixel_lat)
-         tilesize=int(degrees_per_tile/degrees_per_pixel_lat)
+      tilesize=int(degrees_per_tile/degrees_per_pixel)
 
       return (img_width, img_height, tilesize)
 

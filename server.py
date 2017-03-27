@@ -14,6 +14,7 @@ import re
 
 class requestHandler(tornado.web.RequestHandler):
    def get(self):
+      def clamp(n, smallest, largest): return max(smallest, min(n, largest))
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
 
@@ -36,10 +37,13 @@ class requestHandler(tornado.web.RequestHandler):
                druidurl=druidurl+'+OR+data_resource_uid:'+druid[dsk]
          druidurl=druidurl+')'
 
-      w = self.get_argument('w','-1')
-      w = int(re.sub(r'[^\-0-9]', '', w)) #sanitise
-      h = self.get_argument('h','-1')
-      h = int(re.sub(r'[^\-0-9]', '', h)) #sanitise
+      w = self.get_argument('w','')
+      w = re.sub(r'[^0-9]', '', w) #sanitise
+      w = -1 if w=='' else clamp(int(w),80,800)
+
+      h = self.get_argument('h','')
+      h = re.sub(r'[^0-9]', '', h) #sanitise
+      h = -1 if h=='' else clamp(int(h),80,800)
 
       dpt=800000
 
