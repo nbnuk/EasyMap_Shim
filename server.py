@@ -19,9 +19,11 @@ class requestHandler(tornado.web.RequestHandler):
 
       def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
+      #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
 
+      #Vice County
       vc = self.get_argument('vc',default='')
       vc = re.sub(r'[^0-9]', '', vc) #sanitise
       zoom = self.get_argument('zoom',default='UK')
@@ -29,6 +31,7 @@ class requestHandler(tornado.web.RequestHandler):
       if vc=='': vc=zoom
       (lon0,lat0,lon1,lat1)=bboxes[vc]
 
+      #OSGrid Reference
       bl = self.get_argument('bl',default=False) 
       tr = self.get_argument('tr',default=False)
       if bl and tr:
@@ -37,6 +40,7 @@ class requestHandler(tornado.web.RequestHandler):
          (lon0,lat0)=GR_to_EPSG3857(bl)
          (lon1,lat1)=GR_to_EPSG3857(tr)
 
+      #Northing,Easting
       blCoord = self.get_argument('blCoord',default=False)
       trCoord = self.get_argument('trCoord',default=False)
       if blCoord and trCoord:
@@ -45,7 +49,8 @@ class requestHandler(tornado.web.RequestHandler):
          if len(blCoord)==2 and len(trCoord)==2:
             (lon0,lat0)=NE_to_EPSG3857(blCoord)
             (lon1,lat1)=NE_to_EPSG3857(trCoord)
-      
+
+      #Retrict the range of lat,lon and correct the order
       lon0 = clamp(lon0,bboxes['uk'][0],bboxes['uk'][2])
       lat0 = clamp(lat0,bboxes['uk'][1],bboxes['uk'][3])
       lon1 = clamp(lon1,bboxes['uk'][0],bboxes['uk'][2])
@@ -53,7 +58,8 @@ class requestHandler(tornado.web.RequestHandler):
       if lon0>lon1: lon0,lon1 = lon1,lon0
       if lat0>lat1: lat0,lat1 = lat1,lat0
 
-      ds = self.get_argument('ds','')
+      #Datasource
+      ds = self.get_argument('ds',default='')
       ds = re.sub(r'[^a-zA-Z0-9,]', '', ds) #sanitise
       druidurl=''
       if not ds=='':
@@ -64,18 +70,33 @@ class requestHandler(tornado.web.RequestHandler):
                druidurl=druidurl+'+OR+data_resource_uid:'+druid[dsk]
          druidurl=druidurl+')'
 
-      w = self.get_argument('w','')
+      #Image Width
+      w = self.get_argument('w',default='')
       w = re.sub(r'[^0-9]', '', w) #sanitise
       w = -1 if w=='' else clamp(int(w),80,800)
 
-      h = self.get_argument('h','')
+      #Image Height
+      h = self.get_argument('h',default='')
       h = re.sub(r'[^0-9]', '', h) #sanitise
       h = -1 if h=='' else clamp(int(h),80,800)
+
+      #Date Bands
+      b0from = self.get_argument('b0from',default='0000')
+      b0from = re.sub(r'[^0-9]', '', b0from) #sanitise
+      if not len(b0from)==4: b0from=False
+      b0to = self.get_argument('b0to',default='9999')
+      b0to = re.sub(r'[^0-9]', '', b0to) #sanitise
+      if not len(b0to)==4: b0to=False
+      b0fill = self.get_argument('b0fill',default='FFFF00').upper()
+      b0fill = re.sub(r'[^A-F0-9]', '', b0fill) #sanitise
+      if not len(b0fill)==6: b0fill='000000'
+      #b0bord =self.get_argument('b0bord',default='000000')
+      rangeurl = '' if not (b0from and b0to) else '+AND+year:['+b0from+'+TO+'+b0to+']'
 
       dpt=400000
 
       url1="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
-      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+"&ENV=colourmode:osgrid;color:ffff00;opacity:0.75;gridlabels:false;gridres:singlegrid"
+      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       #Supersampling 
       #img1=imageFor(url1, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
       #img1.thumbnail((img1.size[0]/2,img1.size[1]/2), Image.LINEAR)
