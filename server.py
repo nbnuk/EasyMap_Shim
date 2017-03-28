@@ -12,13 +12,22 @@ from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
+import hashlib
 import re
+import os
+
+def clamp(n, smallest, largest): return max(smallest, min(n, largest))
+
+def hashToCachePath(hash):
+   cachepath='cache/'+hash[0:2]+'/'+hash[2:4]+'/'+hash[4:]
+   os.makedirs('/'.join(cachepath.split('/')[0:2]),exist_ok=True)
+   os.makedirs('/'.join(cachepath.split('/')[0:3]),exist_ok=True)
+   return cachepath
 
 class requestHandler(tornado.web.RequestHandler):
-   def get(self):
 
-      def clamp(n, smallest, largest): return max(smallest, min(n, largest))
-
+   def generateImage(self):
+      
       #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
@@ -148,13 +157,20 @@ class requestHandler(tornado.web.RequestHandler):
       if url2:
          imgLayer=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt)
          imgResult=Image.alpha_composite(imgResult,imgLayer)
-      imgResult.save( 'tmp.png', 'PNG' )
+      return imgResult
+   
+   def get(self):
+      cachepath = hashToCachePath(hashlib.sha256(self.request.uri.encode('utf8')).hexdigest())
+      if not os.path.exists(cachepath):
+         img = self.generateImage()
+         img.save(cachepath, 'PNG' )
 
       self.set_header("Content-type",  "image/png")
-      with open('tmp.png','rb') as f: 
+      with open(cachepath,'rb') as f:
          data = f.read()
          self.write(data)
-#      os.remove('tmp.png')
+
+
 
 application = tornado.web.Application([
    (r'/EasyMap', requestHandler),
