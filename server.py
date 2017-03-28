@@ -174,6 +174,7 @@ class requestHandler(tornado.web.RequestHandler):
 
 application = tornado.web.Application([
    (r'/EasyMap', requestHandler),
+   (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static', 'default_filename': 'index.html'})
 ])
 
 #Load vc/zoom tables
