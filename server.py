@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from loadimage import imageFor
-from PIL import Image, ImageEnhance
+from PIL import Image
 
 from loadbboxes import bboxFor
 
@@ -65,20 +65,22 @@ class requestHandler(tornado.web.RequestHandler):
       h = re.sub(r'[^0-9]', '', h) #sanitise
       h = -1 if h=='' else clamp(int(h),80,800)
 
-      dpt=800000
+      dpt=400000
 
       url1="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
-      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+"&ENV=colourmode:osgrid;color:ffff00;name:circle;size:4;opacity:0.5;gridlabels:false;gridres:singlegrid"
+      url2="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+"&ENV=colourmode:osgrid;color:ffff00;opacity:0.75;gridlabels:false;gridres:singlegrid"
       #Supersampling 
       #img1=imageFor(url1, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
       #img1.thumbnail((img1.size[0]/2,img1.size[1]/2), Image.LINEAR)
       #img2=imageFor(url2, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
       #img2.thumbnail((img2.size[0]/2,img2.size[1]/2), Image.LINEAR)
       img1=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt)
+      gray = img1.convert('L')
+      img1 = gray.point(lambda x: 0 if x<8 else 255, 'L')
+      img1 = img1.convert('RGBA')
       img2=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt)
-      img3 = Image.blend(img1, img2, alpha=0.65)
-      img4 = ImageEnhance.Contrast(img3).enhance(2)
-      img4.save( 'tmp.png', 'PNG' )
+      img3=Image.alpha_composite(img1,img2)
+      img3.save( 'tmp.png', 'PNG' )
 
       self.set_header("Content-type",  "image/png")
       with open('tmp.png','rb') as f: 
