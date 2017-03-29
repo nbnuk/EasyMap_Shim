@@ -92,19 +92,22 @@ class imageRequestHandler(tornado.web.RequestHandler):
       h = -1 if h=='' else clamp(int(h),80,800)
 
       #Date Band (0)
-      b0from = self.get_argument('b0from',default='0000')
-      b0from = re.sub(r'[^0-9]', '', b0from) #sanitise
-      if not len(b0from)==4: b0from=False
-      b0to = self.get_argument('b0to',default='9999')
-      b0to = re.sub(r'[^0-9]', '', b0to) #sanitise
-      if not len(b0to)==4: b0to=False
+      if self.get_argument('b0from',default=False) or self.get_argument('b0to',default=False):
+         b0from = self.get_argument('b0from',default='0000')
+         b0from = re.sub(r'[^0-9]', '', b0from) #sanitise
+         if not len(b0from)==4: b0from=False
+         b0to = self.get_argument('b0to',default='9999')
+         b0to = re.sub(r'[^0-9]', '', b0to) #sanitise
+         if not len(b0to)==4: b0to=False
+         rangeurl0 = '+AND+year:['+b0from+'+TO+'+b0to+']'
+      else:
+         rangeurl0 = ''
       b0fill = self.get_argument('b0fill',default='FFFF00').upper()
       b0fill = re.sub(r'[^A-F0-9]', '', b0fill) #sanitise
       if not len(b0fill)==6: b0fill='000000'
       #b0bord =self.get_argument('b0bord',default='000000')
-      rangeurl0 = '' if not (b0from and b0to) else '+AND+year:['+b0from+'+TO+'+b0to+']'
 
-      #Date Band (1 optional)
+      #Date Band (1 optional layer)
       if self.get_argument('b1from',default=False) or self.get_argument('b1to',default=False):
          b1from = self.get_argument('b1from',default='0000')
          b1from = re.sub(r'[^0-9]', '', b1from) #sanitise
@@ -120,7 +123,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       else:
          rangeurl1 = ''
 
-      #Date Band (2 optional)
+      #Date Band (2 optional layer)
       if self.get_argument('b2from',default=False) or self.get_argument('b2to',default=False):
          b2from = self.get_argument('b2from',default='0000')
          b2from = re.sub(r'[^0-9]', '', b2from) #sanitise
@@ -211,7 +214,7 @@ druid=allUidForGuid()
 
 if __name__ == "__main__":
    http_server = tornado.httpserver.HTTPServer(application)
-   http_server.listen(8200)
+   http_server.listen(8100)
    loop=tornado.ioloop.IOLoop.instance()
 loop.start()
 
