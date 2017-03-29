@@ -81,4 +81,3 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
       img.paste(tileobj['tileimg'],tileobj['pos'])
    return img
 
-
