@@ -12,9 +12,11 @@ from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857
 import tornado.httpserver
 import tornado.ioloop
 import tornado.web
+import tornado.template
 import hashlib
 import re
 import os
+import time
 
 def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
@@ -24,7 +26,7 @@ def hashToCachePath(hash):
    os.makedirs('/'.join(cachepath.split('/')[0:3]),exist_ok=True)
    return cachepath
 
-class requestHandler(tornado.web.RequestHandler):
+class imageRequestHandler(tornado.web.RequestHandler):
 
    def generateImage(self):
       
@@ -134,6 +136,7 @@ class requestHandler(tornado.web.RequestHandler):
       else:
          rangeurl2 = ''
 
+      #Degrees Per Tile (used to control which layer is returned by wms)
       dpt=400000
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
@@ -160,8 +163,16 @@ class requestHandler(tornado.web.RequestHandler):
       return imgResult
    
    def get(self):
-      cachepath = hashToCachePath(hashlib.sha256(self.request.uri.encode('utf8')).hexdigest())
-      if not os.path.exists(cachepath):
+      #Time after which a new image will be generated instead of cache version (0 to force generation)
+      cachedays = self.get_argument('cachedays',default='7')
+      cachedays = int(re.sub(r'[^0-9]', '', cachedays)) #sanitise
+      cachedays = clamp(cachedays, 0, 365)
+
+      #Get path to cached file (remove the additional cachedays parameter, which must be last in the uri)
+      uri = self.request.uri.split('&cachedays')[0]
+      cachepath = hashToCachePath(hashlib.sha256(uri.encode('utf8')).hexdigest())
+
+      if (not os.path.exists(cachepath)) or (time.time()-os.path.getmtime(cachepath))>cachedays*24*60*60:
          img = self.generateImage()
          img.save(cachepath, 'PNG' )
 
@@ -170,10 +181,18 @@ class requestHandler(tornado.web.RequestHandler):
          data = f.read()
          self.write(data)
 
+class easymapRequestHandler(tornado.web.RequestHandler):
+   def initialize(self):
+      self.template_loader = tornado.template.Loader("templates")
 
+   def get(self):
+      #Adjust uri to return insert image in html
+      image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
+      self.write(self.template_loader.load('maponly.html').generate(image_url=image_url))
 
 application = tornado.web.Application([
-   (r'/EasyMap', requestHandler),
+   (r'/EasyMap', easymapRequestHandler),
+   (r'/Image', imageRequestHandler),
    (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static', 'default_filename': 'index.html'})
 ])
 
