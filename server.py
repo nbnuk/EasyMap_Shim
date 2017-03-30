@@ -143,9 +143,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       dpt=400000
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
-      url0="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
+      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
+      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
+      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
 
       #Supersampling 
       #img1=imageFor(url1, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
@@ -193,9 +193,41 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
       self.write(self.template_loader.load('maponly.html').generate(image_url=image_url))
 
+class singlespeciesRequestHandler(tornado.web.RequestHandler):
+   def get(self, tvk):
+       #Monkey mapping of a small set of singlespecies params to easymap params
+      #https://gis.nbn.org.uk/SingleSpecies/NHMSYS0001387317/map?datasets=GA000157,GA001180&resolution=10km&imagesize=4&band=1600-1987,ffffff,000000&band=1988-1997,0095ff,000000&band=1998-2025,0000ff,000000
+      #sizes=[(100,135),(200,270),(300,405),(400,540),(500,675),(600,810),(700,945),(800,1080),(900,1215),(1000,1350),(1100,1485),(1200,1620),(1300,1755),(1400,1890),(1500,2025)]
+
+      def getbandparams(paramstring):
+         params=(paramstring.split(',')) #'start_year-stop_year','fill_col' (,'border_col ignored')
+         years = re.sub(r'[^0-9\-]','',params[0]).split('-')
+         year0 = years[0] if len(years) > 0 and len(years[0])==4 else '0000'
+         year1 = years[1] if len(years) > 1 and len(years[1])==4 else '9999'
+         fillc = 'ffffff'
+         if len(params)>1:
+            c = re.sub(r'[^0-9a-f]','',params[1].lower())
+            if len(c)==6: fillc = c
+         return (year0,year1,fillc)
+
+      #tvk=self.request.uri.split('/')[4]
+      datasets=self.get_argument('datasets',default=False)
+      w=str(clamp(int(re.sub('[^0-9]','',self.get_argument('imagesize',default='10'))),1,10)*100)
+      bands=self.get_arguments('band')
+      (b0from,b0to,b0fill) = getbandparams(bands[0]) if len(bands) > 0 else (False, False, False)
+      (b1from,b1to,b1fill) = getbandparams(bands[1]) if len(bands) > 1 else (False, False, False)
+      (b2from,b2to,b2fill) = getbandparams(bands[2]) if len(bands) > 2 else (False, False, False)
+      url = '/Image?tvk='+tvk+'&w='+w
+      if datasets: url = url + '&datasets='+datasets
+      if b0from:   url = url + '&b0from='+b0from+'&b0to='+b0to+'&b0fill='+b0fill
+      if b1from:   url = url + '&b1from='+b1from+'&b1to='+b1to+'&b1fill='+b1fill
+      if b2from:   url = url + '&b2from='+b2from+'&b2to='+b2to+'&b2fill='+b2fill
+      self.redirect(url) 
+
 application = tornado.web.Application([
    (r'/EasyMap', easymapRequestHandler),
    (r'/Image', imageRequestHandler),
+   (r'/SingleSpecies/(.*)/map', singlespeciesRequestHandler),
    (r'/(.*)', tornado.web.StaticFileHandler, {'path': 'static', 'default_filename': 'index.html'})
 ])
 
@@ -214,7 +246,7 @@ druid=allUidForGuid()
 
 if __name__ == "__main__":
    http_server = tornado.httpserver.HTTPServer(application)
-   http_server.listen(8100)
+   http_server.listen(8200)
    loop=tornado.ioloop.IOLoop.instance()
 loop.start()
 
