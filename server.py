@@ -160,17 +160,19 @@ class imageRequestHandler(tornado.web.RequestHandler):
       #imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
       #imgBase = imgBaseGreyThreshold.convert('RGBA')
       imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
-      if imgLayer:
-         imgResult=Image.alpha_composite(imgBase,imgLayer)
-      else: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
+      if not imgLayer: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
          print('fallback')
+         #At dpi=254, 1 inch=25.4mm (defined), dpmm=dpi/i/mm dpmm=254/1/25.4=10, so 1mm=10pixels for width and height
          (lon0,lat0)=EPSG3857_to_EPSG4326((lon0,lat0))
          (lon1,lat1)=EPSG3857_to_EPSG4326((lon1,lat1))
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=300"
+         (w,h)=imgBase.size
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=254&widthmm="+str(w/10)
          print(url)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
-         imgResult = Image.open(f)
+         imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
+      imgResult=Image.alpha_composite(imgBase,imgLayer)
+
       if url1:
          imgLayer=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
          imgResult=Image.alpha_composite(imgResult,imgLayer)
