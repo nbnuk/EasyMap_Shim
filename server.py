@@ -143,6 +143,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
       dpt=400000
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
+      urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:world"
+      urlBase="http://129.206.228.72/cached/hillshade?LAYERS=europe_wms:hs_srtm_europa&STYLES="
       url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
@@ -152,9 +154,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       #img1.thumbnail((img1.size[0]/2,img1.size[1]/2), Image.LINEAR)
       #img2=imageFor(url2, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
       #img2.thumbnail((img2.size[0]/2,img2.size[1]/2), Image.LINEAR)
-      imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, dpt)
-      imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
-      imgBase = imgBaseGreyThreshold.convert('RGBA')
+      imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0)
+#      imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
+#      imgBase = imgBaseGreyThreshold.convert('RGBA')
       imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt)
       imgResult=Image.alpha_composite(imgBase,imgLayer)
       if url1:

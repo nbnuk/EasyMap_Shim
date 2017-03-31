@@ -34,11 +34,11 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
          degrees_per_pixel=max(degrees_per_pixel_lon,degrees_per_pixel_lat)
 
       tilesize=int(degrees_per_tile/degrees_per_pixel)
-      #print('W='+str(img_width)+'H='+str(img_height)+'T='+str(tilesize))
+      print('W='+str(img_width)+'H='+str(img_height)+'T='+str(tilesize))
       largest_dim = img_width if img_width>img_height else img_width
       if tilesize>largest_dim*2: tilesize=largest_dim*2
       if tilesize<20: tilesize=20
-      #print(str(tilesize))
+      print(str(tilesize))
       return (img_width, img_height, tilesize)
 
    #Parallelisable routine to load tile and save its position in the image
@@ -49,6 +49,7 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
       return {'tileimg':tileimg,'pos':tilespec['pos']}
 
    #Setup configuration
+   if degrees_per_tile==0: degrees_per_tile=99999999999 #Just load one single fullsize (square) image
    (Width,Height,TileSize)=setup(bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, img_height, degrees_per_tile)
 
    #Iterate over all tiles and create url requests
@@ -61,6 +62,7 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
           bblat1=mapcoord(bbox_lat0,bbox_lat1,0,Height,y+TileSize)
           bbox=str(bblon0)+","+str(bblat0)+","+str(bblon1)+","+str(bblat1)
           url=base_url+"&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX="+bbox+"&SRS=EPSG:3857&WIDTH="+str(TileSize)+"&HEIGHT="+str(TileSize)+"&format=image%2Fpng"
+          print(url)
           tilespecs.append({'url':url,'pos':(x, Height-TileSize-y)})
 
    #Create workers to load each tile
