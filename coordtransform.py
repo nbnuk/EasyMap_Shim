@@ -1,7 +1,11 @@
 from pyproj import Proj, transform 
 
+EPSG4326=Proj(init='epsg:4326')
 EPSG3857=Proj(init='epsg:3857')
 EPSG27700=Proj(init='epsg:27700')
+
+def EPSG3857_to_EPSG4326(LL):
+   return transform(EPSG3857, EPSG4326, LL[0], LL[1])
 
 def NE_to_EPSG3857(NE):
    return transform(EPSG27700, EPSG3857, NE[0], NE[1])

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#delete following on refactor
+import urllib.request
+import io
 
 from loadimage import imageFor
 from PIL import Image
@@ -7,7 +10,7 @@ from loadbboxes import bboxFor
 
 from loaddatasources import allUidForGuid
 
-from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857
+from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857, EPSG3857_to_EPSG4326
 
 import tornado.httpserver
 import tornado.ioloop
@@ -139,8 +142,12 @@ class imageRequestHandler(tornado.web.RequestHandler):
       else:
          rangeurl2 = ''
 
+      #Resolution (10km - use tiles, 2km, 1km, 100m render using static image service circles)
+      res = self.get_argument('res',default='').lower()
+      if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
       #Degrees Per Tile (used to control which layer is returned by wms)
-      dpt=400000
+      dpt={'10km':400000,'2km':80000,'1km':40000,'100m':4000}[res]
+      maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:world"
@@ -149,21 +156,26 @@ class imageRequestHandler(tornado.web.RequestHandler):
       url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
 
-      #Supersampling 
-      #img1=imageFor(url1, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
-      #img1.thumbnail((img1.size[0]/2,img1.size[1]/2), Image.LINEAR)
-      #img2=imageFor(url2, lon0, lat0, lon1, lat1, w*2, h*2, dpt)
-      #img2.thumbnail((img2.size[0]/2,img2.size[1]/2), Image.LINEAR)
-      imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0)
-#      imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
-#      imgBase = imgBaseGreyThreshold.convert('RGBA')
-      imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt)
-      imgResult=Image.alpha_composite(imgBase,imgLayer)
+      imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
+      #imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
+      #imgBase = imgBaseGreyThreshold.convert('RGBA')
+      imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
+      if imgLayer:
+         imgResult=Image.alpha_composite(imgBase,imgLayer)
+      else: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
+         print('fallback')
+         (lon0,lat0)=EPSG3857_to_EPSG4326((lon0,lat0))
+         (lon1,lat1)=EPSG3857_to_EPSG4326((lon1,lat1))
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=300"
+         print(url)
+         with urllib.request.urlopen(url) as req:
+            f = io.BytesIO(req.read())
+         imgResult = Image.open(f)
       if url1:
-         imgLayer=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt)
+         imgLayer=imageFor(url1, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
          imgResult=Image.alpha_composite(imgResult,imgLayer)
       if url2:
-         imgLayer=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt)
+         imgLayer=imageFor(url2, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
          imgResult=Image.alpha_composite(imgResult,imgLayer)
       return imgResult
    

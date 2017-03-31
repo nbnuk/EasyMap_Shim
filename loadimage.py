@@ -3,7 +3,7 @@ from PIL import Image
 import io
 import concurrent.futures
 
-def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, img_height, degrees_per_tile):
+def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, img_height, degrees_per_tile, max_tiles):
    #Linearly map a->b
    def mapcoord(a0,a1,b0,b1,b2):
       da=a1-a0
@@ -64,6 +64,9 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
           url=base_url+"&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX="+bbox+"&SRS=EPSG:3857&WIDTH="+str(TileSize)+"&HEIGHT="+str(TileSize)+"&format=image%2Fpng"
           print(url)
           tilespecs.append({'url':url,'pos':(x, Height-TileSize-y)})
+
+   #Short circuit if we are about to ask the server for too many tiles
+   if len(tilespecs)>max_tiles: return False
 
    #Create workers to load each tile
    tileobjs=[]
