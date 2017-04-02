@@ -149,7 +149,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       res = self.get_argument('res',default='').lower()
       if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
       #Degrees Per Tile (used to control which layer is returned by wms)
-      dpt={'10km':400000,'2km':80000,'1km':40000,'100m':4000}[res]
+      dpt={'10km':250000,'2km':50000,'1km':25000,'100m':2500}[res]
       maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
@@ -232,6 +232,7 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       ref = self.get_argument('ref',default='')=='1'
       if ref: ref=datasourceListForDRUIDSandTVK(druidlist,tvk)
       logo  = self.get_argument('logo',default='')=='1'
+      if self.get_argument('maponly',default='')=='1': title,terms,link,ref,logo=False,False,False,False,False
       self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=terms,link=link,ref=ref,logo=logo))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
