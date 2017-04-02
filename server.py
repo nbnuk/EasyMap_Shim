@@ -8,7 +8,7 @@ from PIL import Image
 
 from loadbboxes import bboxFor
 
-from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK
+from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK
 
 from coordtransform import NE_to_EPSG27700, GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
@@ -213,6 +213,14 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
 
+      #Datasource
+      ds = self.get_argument('ds',default='')
+      ds = re.sub(r'[^a-zA-Z0-9,]', '', ds) #sanitise
+      druidlist=[]
+      if not ds=='':
+         for dsk in ds.split(','):
+               druidlist.append(druid[dsk])
+
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
       title = self.get_argument('title',default='').lower()
       if   title=="sci": title=sciNameForTVK(tvk)
@@ -221,9 +229,10 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       terms = self.get_argument('terms',default='')=='1'
       link  = self.get_argument('link',default='')=='1'
       if link: link='https://records.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'#tab_mapView' 
-
+      ref = self.get_argument('ref',default='')=='1'
+      if ref: ref=datasourceListForDRUIDSandTVK(druidlist,tvk)
       logo  = self.get_argument('logo',default='')=='1'
-      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=terms,link=link,ref='R',logo=logo))
+      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=terms,link=link,ref=ref,logo=logo))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):

@@ -29,22 +29,27 @@ def allUidForGuid():
    return guid_to_uid
 
 def sciNameForTVK(tvk):
-      req = 'https://species-ws.nbnatlas.org/species/'+tvk
-      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
-      obj=json.loads(rsp)
-      try:
-         nameString=obj['taxonConcept']['nameString']
-      except:
-         nameString='No taxonConcept/nameString for tvk:'+tvk
-      return nameString
+   req = 'https://species-ws.nbnatlas.org/species/'+tvk
+   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   obj=json.loads(rsp)
+   try:
+      nameString=obj['taxonConcept']['nameString']
+   except:
+      nameString='No taxonConcept/nameString for tvk:'+tvk
+   return nameString
 
 def comNameForTVK(tvk):
-      req = 'https://species-ws.nbnatlas.org/species/'+tvk
-      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
-      obj=json.loads(rsp)
-      try:
-         nameString=obj['commonNames'][0]['nameString']
-      except:
-         nameString=sciNameForTVK(tvk)+' (no common names)'
-      return nameString
+   req = 'https://species-ws.nbnatlas.org/species/'+tvk
+   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   obj=json.loads(rsp)
+   try:
+      nameString=obj['commonNames'][0]['nameString']
+   except:
+      nameString=sciNameForTVK(tvk)+' (no common names)'
+   return nameString
 
+def datasourceListForDRUIDSandTVK(druids,tvk):
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=9999999&pageSize=0'
+   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   obj1=json.loads(rsp)
+   return druids
