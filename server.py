@@ -218,7 +218,12 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       if   title=="sci": title=sciNameForTVK(tvk)
       elif title=="com": title=comNameForTVK(tvk)
       else             : title=False
-      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=True,link='L',ref='R',logo=True))
+      terms = self.get_argument('terms',default='')=='1'
+      link  = self.get_argument('link',default='')=='1'
+      if link: link='https://records.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'#tab_mapView' 
+
+      logo  = self.get_argument('logo',default='')=='1'
+      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=terms,link=link,ref='R',logo=logo))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):
