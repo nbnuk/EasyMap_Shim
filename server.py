@@ -158,11 +158,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
-      #imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
-      #imgBase = imgBaseGreyThreshold.convert('RGBA')
+      
       imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
       if not imgLayer: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
-         print('fallback')
          #At dpi=254, 1 inch=25.4mm (defined), dpmm=dpi/i/mm dpmm=254/1/25.4=10, so 1mm=10pixels for width and height
          radius={'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0) #radius (grid /20 [/2 for radius 1mm=10px])*imgwidth(px)/worldwidth(m)
          radius=str(radius) if radius>=0.1 else "0.1" #radius<0.1mm are not drawn by the mapping service
