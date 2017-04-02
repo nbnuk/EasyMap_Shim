@@ -142,6 +142,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       else:
          rangeurl2 = ''
 
+      #Base map (os TBD after conversion to 27700)
+      basemap = 'county_coastal_terrestrial_region' if self.get_argument('bg',default='').lower()=='vc' else 'world'
+
       #Resolution (10km - use tiles, 2km, 1km, 100m render using static image service circles)
       res = self.get_argument('res',default='').lower()
       if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
@@ -149,9 +152,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       dpt={'10km':400000,'2km':80000,'1km':40000,'100m':4000}[res]
       maxtiles=200
 
-      urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
-      urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:world"
-      urlBase="http://129.206.228.72/cached/hillshade?LAYERS=europe_wms:hs_srtm_europa&STYLES="
+      urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
       url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
       url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
@@ -170,7 +171,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (w,h)=imgBase.size
          url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=254&widthmm="+str(w/10)
          #druid and range currently broken in api, awaiting fix
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour="+b0fill+"&scale=off&popacity=1.0&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=1.0&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
