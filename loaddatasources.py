@@ -49,7 +49,12 @@ def comNameForTVK(tvk):
    return nameString
 
 def datasourceListForDRUIDSandTVK(druids,tvk):
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=9999999&pageSize=0'
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&fq=lsid:'+tvk+'&facets=data_resource_uid&flimit=9999999&pageSize=0'
    rsp=urllib.request.urlopen(req).readall().decode('utf-8')
-   obj1=json.loads(rsp)
-   return druids
+   obj=json.loads(rsp)
+   result=[]
+   for i in obj['facetResults'][0]['fieldResult']:
+      druid = i['fq'].split(':')[1].strip('\"')
+      if len(druids)==0 or druid in druids:
+         result.append(i['label'])
+   return result
