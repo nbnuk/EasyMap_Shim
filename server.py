@@ -147,7 +147,6 @@ class imageRequestHandler(tornado.web.RequestHandler):
       if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
       #Degrees Per Tile (used to control which layer is returned by wms)
       dpt={'10km':400000,'2km':80000,'1km':40000,'100m':4000}[res]
-      dpt=1
       maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:county_coastal_terrestrial_region"
@@ -164,16 +163,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
       if not imgLayer: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
          print('fallback')
          #At dpi=254, 1 inch=25.4mm (defined), dpmm=dpi/i/mm dpmm=254/1/25.4=10, so 1mm=10pixels for width and height
-         print(lon1-lon0) #width of image in meters
-         print(w) #width of image in pixels
-         print(w/(lon1-lon0)) #image pixels per meter
-         print({'10km':10000,'2km':2000,'1km':1000,'100m':100}[res]) #size of grid in meters
-         print(({'10km':10000,'2km':2000,'1km':1000,'100m':100}[res]*w/(lon1-lon0))) #size of grid in pixels
-         print((({'10km':10000,'2km':2000,'1km':1000,'100m':100}[res]*w/(lon1-lon0)))/10) #size of grid in mm (1mm = 10pixels) 
-         print((({'10km':10000,'2km':2000,'1km':1000,'100m':100}[res]*w/(lon1-lon0)))/20) #/2 to get radius
-         radius={'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0)
+         radius={'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0) #radius (grid /20 [/2 for radius 1mm=10px])*imgwidth(px)/worldwidth(m)
          radius=str(radius) if radius>=0.1 else "0.1" #radius<0.1mm are not drawn by the mapping service
-         print(radius)
          (lon0,lat0)=EPSG3857_to_EPSG4326((lon0,lat0))
          (lon1,lat1)=EPSG3857_to_EPSG4326((lon1,lat1))
          (w,h)=imgBase.size
