@@ -153,9 +153,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
+      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       #imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
@@ -169,9 +169,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (lon0,lat0)=EPSG27700_to_EPSG4326((lon0,lat0))
          (lon1,lat1)=EPSG27700_to_EPSG4326((lon1,lat1))
          (w,h)=imgBase.size
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=254&widthmm="+str(w/10)
-         #druid and range currently broken in api, awaiting fix
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=1.0&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
+         #TODO. Alg should probably be no transparancy in layers then blend in basemap last
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -255,17 +255,10 @@ application = tornado.web.Application([
 bboxes={}
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl2'))  #UK Countries
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl14')) #UK Vice Counties
-#and some more I looked up by hand on google earth (gps->epsg:3857)
-#bboxes.update({'highland':(-775130.5274544959, 7630301.682472427, -308177.99150700646, 8134127.260152808)})
-#bboxes.update({'sco-mainland':(-734225.0673675996, 7278475.738469875, -176279.97964568838, 8118784.824617484)})
-#bboxes.update({'outer-heb':(-964621.4589895669, 7687560.282221712, -675534.4261951343, 8092442.674175756)})
-#bboxes.update({'uk':(-1208316.543132066, 6415818.406144551, 225030.61127155885, 8284550.873660544)})
-#and converted epsg:3857->epsg:27700
+#and some more I looked up by hand on google earth (gps->epsg:27700)
 bboxes.update({'highland':(93577.9965802757, 729630.9703185001, 355677.5284715063, 988891.7244077635)})
 bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.5048700813, 980750.1340887807)})
 bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
-#bboxes.update({'uk':(-236382.64339983894, 29219.695702172423, 627845.5292601183, 1072724.3767546557)})
-#bboxes.update({'uk':(1393.0196, 13494.9764, 671196.3657, 1230275.0454)}) #Official projected bounds
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
 
 #Load (cached) data source table
