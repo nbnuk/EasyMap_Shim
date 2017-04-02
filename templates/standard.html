@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    </head>
+<body>
+    <div><span id="lblDistribution">
+{% if title %}
+            <h3>{{title}}</h3>
+{% end %}
+{% if terms %}
+            <p>The National Biodiversity Network records are shown on the map below. (See <a href="https://data.nbn.org.uk/Terms" target="_blank">terms and conditions</a>)</p>
+{% end %}
+        <img src="{{image_url}}">
+{% if link %}
+            <br>
+            <a href="https://data.nbn.org.uk/imt?mode=SPECIES&amp;species=NHMSYS0000344177" target="_blank">Open interactive map in new window</a>
+{% end %}
+{% if ref %}
+            <p>The following datasets are included:</p>
+                 <li>Dragonfly Recording Network - Dragonfly records 
+from the British Dragonfly Society's Dragonfly Recording Network for the
+ period up to 2014</li>
+{% end %}
+{% if logo %}
+            <a href="https://nbnatlas.org/" target="_blank"><img src="NBNPower.gif"></a>
+{% end %}
+    </span></div>
+
+</body></html>
+

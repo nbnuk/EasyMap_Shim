@@ -209,7 +209,7 @@ class easymapRequestHandler(tornado.web.RequestHandler):
    def get(self):
       #Adjust uri to return insert image in html
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
-      self.write(self.template_loader.load('maponly.html').generate(image_url=image_url))
+      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title='T',terms=True,link='L',ref='R',logo=True))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):
