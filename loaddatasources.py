@@ -28,3 +28,23 @@ def allUidForGuid():
 
    return guid_to_uid
 
+def sciNameForTVK(tvk):
+      req = 'https://species-ws.nbnatlas.org/species/'+tvk
+      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+      obj=json.loads(rsp)
+      try:
+         nameString=obj['taxonConcept']['nameString']
+      except:
+         nameString='No taxonConcept/nameString for tvk:'+tvk
+      return nameString
+
+def comNameForTVK(tvk):
+      req = 'https://species-ws.nbnatlas.org/species/'+tvk
+      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+      obj=json.loads(rsp)
+      try:
+         nameString=obj['commonNames'][0]['nameString']
+      except:
+         nameString=sciNameForTVK(tvk)+' (no common names)'
+      return nameString
+

@@ -8,7 +8,7 @@ from PIL import Image
 
 from loadbboxes import bboxFor
 
-from loaddatasources import allUidForGuid
+from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK
 
 from coordtransform import NE_to_EPSG27700, GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
@@ -208,8 +208,17 @@ class easymapRequestHandler(tornado.web.RequestHandler):
 
    def get(self):
       #Adjust uri to return insert image in html
+
+      #TaxonVersionKey (required)
+      tvk = self.get_argument('tvk')
+      tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
+
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
-      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title='T',terms=True,link='L',ref='R',logo=True))
+      title = self.get_argument('title',default='').lower()
+      if   title=="sci": title=sciNameForTVK(tvk)
+      elif title=="com": title=comNameForTVK(tvk)
+      else             : title=False
+      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=True,link='L',ref='R',logo=True))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):
