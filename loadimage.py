@@ -61,7 +61,7 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
           bblat0=mapcoord(bbox_lat0,bbox_lat1,0,Height,y)
           bblat1=mapcoord(bbox_lat0,bbox_lat1,0,Height,y+TileSize)
           bbox=str(bblon0)+","+str(bblat0)+","+str(bblon1)+","+str(bblat1)
-          url=base_url+"&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX="+bbox+"&SRS=EPSG:3857&WIDTH="+str(TileSize)+"&HEIGHT="+str(TileSize)+"&format=image%2Fpng"
+          url=base_url+"&SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&BBOX="+bbox+"&SRS=EPSG:27700&WIDTH="+str(TileSize)+"&HEIGHT="+str(TileSize)+"&format=image%2Fpng"
           print(url)
           tilespecs.append({'url':url,'pos':(x, Height-TileSize-y)})
 

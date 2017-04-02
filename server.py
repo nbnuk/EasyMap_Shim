@@ -10,7 +10,7 @@ from loadbboxes import bboxFor
 
 from loaddatasources import allUidForGuid
 
-from coordtransform import NE_to_EPSG3857, GR_to_EPSG3857, EPSG3857_to_EPSG4326
+from coordtransform import NE_to_EPSG27700, GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
 import tornado.httpserver
 import tornado.ioloop
@@ -51,8 +51,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
       if bl and tr:
          bl = re.sub(r'[^a-zA-Z0-9]', '', bl) #sanitise
          tr = re.sub(r'[^a-zA-Z0-9]', '', tr) #sanitise
-         (lon0,lat0)=GR_to_EPSG3857(bl)
-         (lon1,lat1)=GR_to_EPSG3857(tr)
+         (lon0,lat0)=GR_to_EPSG27700(bl)
+         (lon1,lat1)=GR_to_EPSG27700(tr)
 
       #Northing,Easting
       blCoord = self.get_argument('blCoord',default=False)
@@ -61,8 +61,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
          blCoord = re.sub(r'[^0-9,]', '', blCoord).split(',') #sanitise
          trCoord = re.sub(r'[^0-9,]', '', trCoord).split(',') #sanitise
          if len(blCoord)==2 and len(trCoord)==2:
-            (lon0,lat0)=NE_to_EPSG3857(blCoord)
-            (lon1,lat1)=NE_to_EPSG3857(trCoord)
+            (lon0,lat0)=NE_to_EPSG27700(blCoord)
+            (lon1,lat1)=NE_to_EPSG27700(trCoord)
 
       #Retrict the range of lat,lon and correct the order
       lon0 = clamp(lon0,bboxes['uk'][0],bboxes['uk'][2])
@@ -166,8 +166,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
          #At dpi=254, 1 inch=25.4mm (defined), dpmm=dpi/i/mm dpmm=254/1/25.4=10, so 1mm=10pixels for width and height
          radius={'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0) #radius (grid /20 [/2 for radius 1mm=10px])*imgwidth(px)/worldwidth(m)
          radius=str(radius) if radius>=0.1 else "0.1" #radius<0.1mm are not drawn by the mapping service
-         (lon0,lat0)=EPSG3857_to_EPSG4326((lon0,lat0))
-         (lon1,lat1)=EPSG3857_to_EPSG4326((lon1,lat1))
+         (lon0,lat0)=EPSG27700_to_EPSG4326((lon0,lat0))
+         (lon1,lat1)=EPSG27700_to_EPSG4326((lon1,lat1))
          (w,h)=imgBase.size
          url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer=world&format=png&pcolour=3531FF&scale=on&popacity=0.5&q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm=0.1&dpi=254&widthmm="+str(w/10)
          #druid and range currently broken in api, awaiting fix
@@ -256,10 +256,17 @@ bboxes={}
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl2'))  #UK Countries
 bboxes.update(bboxFor('https://layers.nbnatlas.org/ws/objects/cl14')) #UK Vice Counties
 #and some more I looked up by hand on google earth (gps->epsg:3857)
-bboxes.update({'highland':(-775130.5274544959, 7630301.682472427, -308177.99150700646, 8134127.260152808)})
-bboxes.update({'sco-mainland':(-734225.0673675996, 7278475.738469875, -176279.97964568838, 8118784.824617484)})
-bboxes.update({'outer-heb':(-964621.4589895669, 7687560.282221712, -675534.4261951343, 8092442.674175756)})
-bboxes.update({'uk':(-1208316.543132066, 6415818.406144551, 225030.61127155885, 8284550.873660544)})
+#bboxes.update({'highland':(-775130.5274544959, 7630301.682472427, -308177.99150700646, 8134127.260152808)})
+#bboxes.update({'sco-mainland':(-734225.0673675996, 7278475.738469875, -176279.97964568838, 8118784.824617484)})
+#bboxes.update({'outer-heb':(-964621.4589895669, 7687560.282221712, -675534.4261951343, 8092442.674175756)})
+#bboxes.update({'uk':(-1208316.543132066, 6415818.406144551, 225030.61127155885, 8284550.873660544)})
+#and converted epsg:3857->epsg:27700
+bboxes.update({'highland':(93577.9965802757, 729630.9703185001, 355677.5284715063, 988891.7244077635)})
+bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.5048700813, 980750.1340887807)})
+bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
+#bboxes.update({'uk':(-236382.64339983894, 29219.695702172423, 627845.5292601183, 1072724.3767546557)})
+#bboxes.update({'uk':(1393.0196, 13494.9764, 671196.3657, 1230275.0454)}) #Official projected bounds
+bboxes.update({'uk':(-236382.64339983894, 13494.9764, 671196.3657, 1230275.0454)})
 
 #Load (cached) data source table
 druid=allUidForGuid()

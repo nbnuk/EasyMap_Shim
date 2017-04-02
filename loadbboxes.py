@@ -4,7 +4,7 @@ import re
 from pyproj import Proj
 
 def bboxFor(url):
-   gpstoproj=Proj(init='epsg:3857')
+   gpstoproj=Proj(init='epsg:27700')
    def splitOnSpace(x):
       return x.split(' ')
    bboxes={}
