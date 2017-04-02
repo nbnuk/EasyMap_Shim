@@ -232,8 +232,9 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       ref = self.get_argument('ref',default='')=='1'
       if ref: ref=datasourceListForDRUIDSandTVK(druidlist,tvk)
       logo  = self.get_argument('logo',default='')=='1'
-      if self.get_argument('maponly',default='')=='1': title,terms,link,ref,logo=False,False,False,False,False
-      self.write(self.template_loader.load('standard.html').generate(image_url=image_url, title=title,terms=terms,link=link,ref=ref,logo=logo))
+      css = self.get_argument('css',default=False)
+      if self.get_argument('maponly',default='')=='1': title,terms,link,ref,logo,css=False,False,False,False,False,False
+      self.write(self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):
@@ -252,7 +253,6 @@ class singlespeciesRequestHandler(tornado.web.RequestHandler):
             if len(c)==6: fillc = c
          return (year0,year1,fillc)
 
-      #tvk=self.request.uri.split('/')[4]
       datasets=self.get_argument('datasets',default=False)
       w=str(clamp(int(re.sub('[^0-9]','',self.get_argument('imagesize',default='10'))),1,10)*100)
       bands=self.get_arguments('band')
