@@ -153,9 +153,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.75;gridlabels:false;gridres:singlegrid"
+      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
+      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
+      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:1.0;gridlabels:false;gridres:singlegrid"
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       #imgBaseGreyThreshold = imgBase.convert('L').point(lambda x: 0 if x<8 else 255, 'L')
@@ -266,7 +266,7 @@ bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.50487
 bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
 #bboxes.update({'uk':(-236382.64339983894, 29219.695702172423, 627845.5292601183, 1072724.3767546557)})
 #bboxes.update({'uk':(1393.0196, 13494.9764, 671196.3657, 1230275.0454)}) #Official projected bounds
-bboxes.update({'uk':(-236382.64339983894, 13494.9764, 671196.3657, 1230275.0454)})
+bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
 
 #Load (cached) data source table
 druid=allUidForGuid()
