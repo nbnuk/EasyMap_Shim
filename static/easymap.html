@@ -8,25 +8,25 @@
         <p>EasyMap service provided by the NBN Gateway enables you to get a live NBN map on your website in one line of HTML.</p>
         <p>The service consists of </p>
         <ul>
-            <li><s><b>Title</b> including species name and link to NBN terms and conditions</s></li>
+            <li><b>Title</b> including species name and link to NBN terms and conditions</li>
             <li><b>Gridmap</b> which can be further customised using additional parameters described below</li>
-            <li><s><b>Link to Interactive map</b> on the NBN Gateway</s></li>
-            <li><s><b>Acknowledgement list</b> of data providers and datasets contributing to the map</s></li>
-            <li><s><b>NBN Gateway logo</b></s></li>
+            <li><b>Link to Interactive map</b> on the NBN Gateway</li>
+            <li><b>Acknowledgement list</b> of data providers and datasets contributing to the map</li>
+            <li><b>NBN Gateway logo</b></li>
         </ul>
         <p>The URL used for the EasyMap service consists of the address to the EasyMap service followed by a query string. This query string, starting with ?, contains one or more parameters used to determine how the map will be displayed. The basic format to display a species map is</p>
-        <pre><code class="prettyPrint">https://data.nbn.org.uk/EasyMap?tvk=TAXONVERSIONKEY</code></pre>
+        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=TAXONVERSIONKEY</code></pre>
         <p>TAXONVERSIONKEY is the TaxonVersionKey (TVK) used on the NBN Gateway for the species. To find the TVK search for the species on the NBN Gateway. The TVK will be displayed in the Taxon section of the species' information page on the NBN Gateway.</p>
 
         <h2 id="iFrames">iFrames</h2>
         <p>The HTML tag &lt;iframe&gt; is used to include the map in your website. This creates a box, with a width and height that you can specify, with the map inside as specified using the src attribute.</p>
         <p>An example, producing a map of Small Red-eyed Damselfly looks like</p>
-        <pre><code class="prettyPrint">&lt;iframe width="400" height="300" src="https://data.nbn.org.uk/EasyMap?tvk=NHMSYS0000344177"&gt;&lt;/iframe&gt;</code></pre>
+        <pre><code class="prettyPrint">&lt;iframe width="400" height="300" src="http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177"&gt;&lt;/iframe&gt;</code></pre>
 
         <h2 id="Customisingthemap">Customising the map</h2>
         <p>By specifying more parameters in the query string you can customise the appearance of the map. Each parameter is added to the query string separated from the previous one by an '&' and is written as <em>ParameterName=Value</em>. Note that the values are case sensitive and that there should be no spaces anywhere in the query string. It is possible to change the size of the map, zoom in on a vice county, select a particular dataset and much more.</p>
         <p>The format of the URL adding an additional parameter is</p>
-        <pre><code class="prettyPrint">https://data.nbn.org.uk/EasyMap?tvk=TAXONVERSIONKEY&ParameterName=Value</code></pre>
+        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=TAXONVERSIONKEY&ParameterName=Value</code></pre>
         <p>The full list of parameters are described below.</p>
 
         <h2 id="Selectingwhatthemapwilldisplay">Selecting what the map will display</h2>
@@ -72,16 +72,16 @@
                 <td><s>Specifies a grid to overlay the map. If omitted, no grid is shown.</s></td>
             </tr>
             <tr>
-                <td><s><b>res</b></s></td>
-                <td><s>Either <b>100m</b>, <b>1km</b> or <b>2km</b></s></td>
-                <td><s>The size of the grid squares to show on the map. If not specified the resolution is 10km. Remember not all datasets can be viewed at higher resolutions.</s></td>
+                <td><b>res</b></td>
+                <td>Either <b>100m</b>, <b>1km</b> or <b>2km</b></td>
+                <td>The size of the grid squares to show on the map. If not specified the resolution is 10km. Remember not all datasets can be viewed at higher resolutions.</td>
             </tr>
             <tr>
-                <td><s><b>bg</b></s></td>
-                <td><s>Either <b>os</b> or <b>vc</b></s></td>
-                <td><s>Specifics a background of either an Ordnance Survey map or Vice County boundaries. If omitted, no background is shown.</s></td>
+                <td><b>bg</b></td>
+                <td><s>Either <b>os</b> or</s> <b>vc</b></td>
+                <td>Specifics a background of <s>either an Ordnance Survey map or</s> Vice County boundaries. If omitted, no background is shown.</td>
             </tr>
-</s>
+
         </table>
 
         <h2 id="Zoominginonthemap">Zooming in on the map</h2>
@@ -204,54 +204,54 @@
                 <td>The border colour for the middle date layer.</td>
             </tr>    
         </table>
-        <h2 id="Selectingwhatpartsoftheservicetobedisplayed"><s>Selecting what parts of the service to be displayed</s></h2>
-        <p><s>Along with the map the service returns a title containing the species name and link to terms and conditions, acknowledgement list of data providers, link to NBN Gateway interactive map and NBN Gateway logo.</s></p>
-        <p><s>To comply with the terms of use of this service the link to the terms and conditions, acknowledgement list of data providers and NBN Gateway logo must be displayed on your site. However they can be turned off if you prefer to include them elsewhere on your site or are restricting the map to just your datasets and do not wish to include the acknowledgement list of data providers.</s></p>
+        <h2 id="Selectingwhatpartsoftheservicetobedisplayed">Selecting what parts of the service to be displayed</h2>
+        <p>Along with the map the service returns a title containing the species name and link to terms and conditions, acknowledgement list of data providers, link to NBN Gateway interactive map and NBN Gateway logo.</p>
+        <p>To comply with the terms of use of this service the link to the terms and conditions, acknowledgement list of data providers and NBN Gateway logo must be displayed on your site. However they can be turned off if you prefer to include them elsewhere on your site or are restricting the map to just your datasets and do not wish to include the acknowledgement list of data providers.</p>
         <table class="attributeTable">
             <tr class="head">
-                <th><s>Parameter Name</s></th>
-                <th><s>Value</s></th>
-                <th><s>Description</s></th>
+                <th>Parameter Name</th>
+                <th>Value</th>
+                <th>Description</th>
             </tr>
             <tr>
-                <td><s><b>title</b></s></td>
-                <td><s><b>sci</b>, <b>com</b>, <b>0</b></s></td>
-                <td><s>Displays either the scientific name or common name as a title or disables it. If omitted the scientific name is displayed.</s></td>
+                <td><b>title</b></td>
+                <td><b>sci</b>, <b>com</b>, <b>0</b></td>
+                <td>Displays either the scientific name or common name as a title or disables it. If omitted the scientific name is displayed.</td>
             </tr>
             <tr>
-                <td><s><b>terms</b></s></td>
-                <td><s><b>0</b></s></td>
-                <td><s>Disables the terms and conditions link and text above the map. By default the link and text are displayed.</s></td>
+                <td><b>terms</b></td>
+                <td><b>0</b></td>
+                <td>Disables the terms and conditions link and text above the map. By default the link and text are displayed.</td>
             </tr>
             <tr>
-                <td><s><b>link</b></s></td>
-                <td><s><b>0</b></s></td>
-                <td><s>Disables the link to the NBN Gateway interactive map. By default the link is displayed.</s></td>
+                <td><b>link</b></td>
+                <td><b>0</b></td>
+                <td>Disables the link to the NBN Gateway interactive map. By default the link is displayed.</td>
             </tr>
             <tr>
-                <td><s><b>ref</b></s></td>
-                <td><s><b>0</b></s></td>
-                <td><s>Disables the list of datasets. By default the list of datasets are shown.</s></td>
+                <td><b>ref</b></td>
+                <td><b>0</b></td>
+                <td>Disables the list of datasets. By default the list of datasets are shown.</td>
             </tr>
             <tr>
-                <td><s><b>logo</b></s></td>
-                <td><s><b>0</b></s></td>
-                <td><s>Disables the NBN Gateway logo. By default the logo is shown.</s></td>
+                <td><b>logo</b></td>
+                <td><b>0</b></td>
+                <td>Disables the NBN Gateway logo. By default the logo is shown.</td>
             </tr>
             <tr>
-                <td><s><b>maponly</b></s></td>
-                <td><s><b>1</b></s></td>
-                <td><s>Setting maponly=1 displays the map only.</s></td>
+                <td><b>maponly</b></td>
+                <td><b>1</b></td>
+                <td>Setting maponly=1 displays the map only.</td>
             </tr>    
         </table>
 
-        <h2 id="Customisingthetext"><s>Customising the text</s></h2>
-        <p><s>To change the appearance and layout of the text returned by the service, the full path to your Cascading Style Sheet can be included in the query string. For example</s></p>
-        <pre><code class="prettyPrint"><s>https://data.nbn.org.uk/EasyMap?tvk=NHMSYS0000344177&css=http://www.mywebaddress.org.uk/mystylesheet.css</s></code></pre>
+        <h2 id="Customisingthetext">Customising the text</h2>
+        <p>To change the appearance and layout of the text returned by the service, the full path to your Cascading Style Sheet can be included in the query string. For example</p>
+        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&css=http://www.mywebaddress.org.uk/mystylesheet.css</code></pre>
 
         <h2 id="Example">Example</h2>
         <p>This example displays a map for Small Red-eyed Damselfly, restricted to a single dataset supplied by Dragonfly Recording Network. The map size has been increased and a 100km grid included.</p>
-        <pre><code class="prettyPrint">https://data.nbn.org.uk/EasyMap?tvk=NHMSYS0000344177&w=600&h=600&gd=100km&ds=GA000012</code></pre>
+        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&w=600&h=600&gd=100km&ds=GA000012</code></pre>
         </div>
             </div>
 <div class="developed-by">Developed for National Biodiversity Network by CEH and JNCC.</div></div>

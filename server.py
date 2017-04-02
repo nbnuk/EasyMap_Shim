@@ -222,18 +222,18 @@ class easymapRequestHandler(tornado.web.RequestHandler):
                druidlist.append(druid[dsk])
 
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
-      title = self.get_argument('title',default='').lower()
+      title = self.get_argument('title',default='sci').lower()
       if   title=="sci": title=sciNameForTVK(tvk)
       elif title=="com": title=comNameForTVK(tvk)
       else             : title=False
-      terms = self.get_argument('terms',default='')=='1'
-      link  = self.get_argument('link',default='')=='1'
+      terms = self.get_argument('terms',default='1')=='1'
+      link  = self.get_argument('link',default='1')=='1'
       if link: link='https://records.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'#tab_mapView' 
-      ref = self.get_argument('ref',default='')=='1'
+      ref = self.get_argument('ref',default='1')=='1'
       if ref: ref=datasourceListForDRUIDSandTVK(druidlist,tvk)
-      logo  = self.get_argument('logo',default='')=='1'
+      logo  = self.get_argument('logo',default='1')=='1'
       css = self.get_argument('css',default=False)
-      if self.get_argument('maponly',default='')=='1': title,terms,link,ref,logo,css=False,False,False,False,False,False
+      if self.get_argument('maponly',default='0')=='1': title,terms,link,ref,logo,css=False,False,False,False,False,False
       self.write(self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css))
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
@@ -288,7 +288,7 @@ druid=allUidForGuid()
 
 if __name__ == "__main__":
    http_server = tornado.httpserver.HTTPServer(application)
-   http_server.listen(8200)
+   http_server.listen(8080)
    loop=tornado.ioloop.IOLoop.instance()
 loop.start()
 
