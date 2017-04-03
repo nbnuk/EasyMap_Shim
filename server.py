@@ -185,13 +185,15 @@ class imageRequestHandler(tornado.web.RequestHandler):
    
    def get(self):
       #Time after which a new image will be generated instead of cache version (0 to force generation)
-      cachedays = self.get_argument('cachedays',default='7')
+      cachedays = self.get_argument('cachedays',default='31')
       cachedays = int(re.sub(r'[^0-9]', '', cachedays)) #sanitise
-      cachedays = clamp(cachedays, 0, 365)
+      cachedays = clamp(cachedays, 0, 31)
 
-      #Get path to cached file (remove the additional cachedays parameter, which must be last in the uri)
-      uri = self.request.uri.split('&cachedays')[0]
-      cachepath = hashToCachePath(hashlib.sha256(uri.encode('utf8')).hexdigest())
+      #Get path to cached file (reduce url to only those params that effect image)
+      ps=''
+      for p in ['tvk','vc','zoom','bl','tr','blCoord','trCoord','ds','w','h','b0fill','b0from','b0to','b1fill','b1from','b1to','b2fill','b2from','b2to','bg','res']:
+         ps=ps+self.get_argument(p,default='X')
+      cachepath = hashToCachePath(hashlib.sha256(ps.encode('utf8')).hexdigest())
 
       if (not os.path.exists(cachepath)) or (time.time()-os.path.getmtime(cachepath))>cachedays*24*60*60:
          img = self.generateImage()
@@ -260,7 +262,7 @@ class singlespeciesRequestHandler(tornado.web.RequestHandler):
       (b1from,b1to,b1fill) = getbandparams(bands[1]) if len(bands) > 1 else (False, False, False)
       (b2from,b2to,b2fill) = getbandparams(bands[2]) if len(bands) > 2 else (False, False, False)
       url = '/Image?tvk='+tvk+'&w='+w
-      if datasets: url = url + '&datasets='+datasets
+      if datasets: url = url + '&ds='+datasets
       if b0from:   url = url + '&b0from='+b0from+'&b0to='+b0to+'&b0fill='+b0fill
       if b1from:   url = url + '&b1from='+b1from+'&b1to='+b1to+'&b1fill='+b1fill
       if b2from:   url = url + '&b2from='+b2from+'&b2to='+b2to+'&b2fill='+b2fill
