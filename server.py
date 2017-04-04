@@ -79,9 +79,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       if not ds=='':
          for dsk in ds.split(','):
             if druidurl=='':
-               druidurl='+AND+(data_resource_uid:'+druid[dsk]
+               druidurl='+AND+(data_resource_uid:'+druidForDs(dsk)
             else:
-               druidurl=druidurl+'+OR+data_resource_uid:'+druid[dsk]
+               druidurl=druidurl+'+OR+data_resource_uid:'+druidForDs(dsk)
          druidurl=druidurl+')'
 
       #Image Width
@@ -154,8 +154,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
       url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       
@@ -169,7 +169,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (w,h)=imgBase.size
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=*:*&fq=species_guid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=*:*&fq=lsid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -221,7 +221,7 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       druidlist=[]
       if not ds=='':
          for dsk in ds.split(','):
-               druidlist.append(druid[dsk])
+               druidlist.append(druidForDs(dsk))
 
       image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
       title = self.get_argument('title',default='sci').lower()
@@ -285,12 +285,18 @@ bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.50487
 bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
 
-#Load (cached) data source table
+#Load (cached) data source table. If old datasource cannot be be, assume it's a new druid
 druid=allUidForGuid()
+def druidForDs(ds):
+   try:
+      result=druid[ds]
+   except:
+      result=ds
+   return result
 
 if __name__ == "__main__":
-   http_server = tornado.httpserver.HTTPServer(application)
-   http_server.listen(8080)
-   loop=tornado.ioloop.IOLoop.instance()
-loop.start()
+   https_server=tornado.httpserver.HTTPServer(application)
+   https_server.bind(8100)
+   https_server.start(8)
+   tornado.ioloop.IOLoop.current().start()
 
