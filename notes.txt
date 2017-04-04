@@ -2,7 +2,7 @@
 
 sudo apt-get update
 sudo apt-get install python-virtualenv build-essential python3-dev zlib1g-dev libjpeg-dev git fail2ban
-git clone https://github.com/DuncanRowland/NeoEasy_Shim.git
+git clone https://github.com/DuncanRowland/EasyMap_Shim.git
 cd EasyMap_Shim
 virtualenv ENV -p python3 --system-site-packages
 source ENV/bin/activate
