@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 cd /home/ubuntu/EasyMap_Shim
 sudo iptables-restore < iptables.conf
