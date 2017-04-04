@@ -296,7 +296,7 @@ def druidForDs(ds):
 
 if __name__ == "__main__":
    https_server=tornado.httpserver.HTTPServer(application)
-   https_server.bind(8100)
+   https_server.bind(8080)
    https_server.start(8)
    tornado.ioloop.IOLoop.current().start()
 
