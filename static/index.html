@@ -22,13 +22,8 @@ Not quite all of the <a href="easymap.html">Original EasyMap Functionality</a> i
 </p>
 <p>
         <h2>Additions</h2>
-In addition to the EasyMap service, a small number of SingleSpecies map generations calls are also implemented (specifically 'band', e.g. <a href="http://188.226.187.206:8080/SingleSpecies/NHMSYS0001387317/map?datasets=GA000157,GA001180&resolution=10km&imagesize=8&band=1600-1987,ffffff,000000&band=1988-1997,0095ff,000000&band=1998-2025,0000ff,000000">http://188.226.187.206:8080/SingleSpecies/NHMSYS0001387317/map?datasets=GA000157,GA001180&resolution=10km&imagesize=8&band=1600-1987,ffffff,000000&band=1988-1997,0095ff,000000&band=1998-2025,0000ff,000000</a>
- N.B. This shim does not implement WMS functions. If you are looking for a replacement for the SingleSpecies WMS urls, please check 'Mapping' in the <a href="http://api.nbnatlas.org">API documentation</a>.
-</p>
-<p>
 Some maps may take significant time to generate (up to 30 seconds for maps with several layers).
  To create a better user experience an automatic caching mechanism has been implemented that stores generated images for up to a month.
-</p>
 </p>
 <p>
 e.g. <a href="http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&w=400&ds=GA000012&b0fill=ff0000">http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&w=400&ds=GA000012&b0fill=ff0000</a>
@@ -36,6 +31,12 @@ e.g. <a href="http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&w=400&ds=
 <center>
 <img width="200px" src="http://188.226.187.206:8080/Image?tvk=NHMSYS0000344177&w=400&ds=GA000012&b0fill=ff0000" width=300px></img>
 </center>
+<br>
+<p>
+In addition to the EasyMap service, a small number of SingleSpecies map generations calls are also implemented (specifically 'band', e.g. <a href="http://188.226.187.206:8080/SingleSpecies/NHMSYS0001387317/map?datasets=GA000157,GA001180&resolution=10km&imagesize=8&band=1600-1987,ffffff,000000&band=1988-1997,0095ff,000000&band=1998-2025,0000ff,000000">http://188.226.187.206:8080/SingleSpecies/NHMSYS0001387317/map?datasets=GA000157,GA001180&resolution=10km&imagesize=8&band=1600-1987,ffffff,000000&band=1988-1997,0095ff,000000&band=1998-2025,0000ff,000000</a>).
+ N.B. This shim does not implement WMS functions. If you are looking for a replacement for the SingleSpecies WMS urls, please check 'Mapping' in the <a href="http://api.nbnatlas.org">API documentation</a>.
+</p>
+<p>
         <h2>Recommendations</h2>
 <p>
 In the future, website developers are advised that dynamic maps are likely to be appreciated by their visitors.
