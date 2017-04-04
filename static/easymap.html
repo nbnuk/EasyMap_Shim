@@ -15,18 +15,18 @@
             <li><b>NBN Gateway logo</b></li>
         </ul>
         <p>The URL used for the EasyMap service consists of the address to the EasyMap service followed by a query string. This query string, starting with ?, contains one or more parameters used to determine how the map will be displayed. The basic format to display a species map is</p>
-        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=TAXONVERSIONKEY</code></pre>
+        <pre><code class="prettyPrint">http://easymap.nbnatlas.org/EasyMap?tvk=TAXONVERSIONKEY</code></pre>
         <p>TAXONVERSIONKEY is the TaxonVersionKey (TVK) used on the NBN Gateway for the species. To find the TVK search for the species on the NBN Gateway. The TVK will be displayed in the Taxon section of the species' information page on the NBN Gateway.</p>
 
         <h2 id="iFrames">iFrames</h2>
         <p>The HTML tag &lt;iframe&gt; is used to include the map in your website. This creates a box, with a width and height that you can specify, with the map inside as specified using the src attribute.</p>
         <p>An example, producing a map of Small Red-eyed Damselfly looks like</p>
-        <pre><code class="prettyPrint">&lt;iframe width="400" height="300" src="http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177"&gt;&lt;/iframe&gt;</code></pre>
+        <pre><code class="prettyPrint">&lt;iframe width="400" height="300" src="http://easymap.nbnatlas.org/EasyMap?tvk=NHMSYS0000344177"&gt;&lt;/iframe&gt;</code></pre>
 
         <h2 id="Customisingthemap">Customising the map</h2>
         <p>By specifying more parameters in the query string you can customise the appearance of the map. Each parameter is added to the query string separated from the previous one by an '&' and is written as <em>ParameterName=Value</em>. Note that the values are case sensitive and that there should be no spaces anywhere in the query string. It is possible to change the size of the map, zoom in on a vice county, select a particular dataset and much more.</p>
         <p>The format of the URL adding an additional parameter is</p>
-        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=TAXONVERSIONKEY&ParameterName=Value</code></pre>
+        <pre><code class="prettyPrint">http://easymap.nbnatlas.org/EasyMap?tvk=TAXONVERSIONKEY&ParameterName=Value</code></pre>
         <p>The full list of parameters are described below.</p>
 
         <h2 id="Selectingwhatthemapwilldisplay">Selecting what the map will display</h2>
@@ -247,11 +247,11 @@
 
         <h2 id="Customisingthetext">Customising the text</h2>
         <p>To change the appearance and layout of the text returned by the service, the full path to your Cascading Style Sheet can be included in the query string. For example</p>
-        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&css=http://www.mywebaddress.org.uk/mystylesheet.css</code></pre>
+        <pre><code class="prettyPrint">http://easymap.nbnatlas.org/EasyMap?tvk=NHMSYS0000344177&css=http://www.mywebaddress.org.uk/mystylesheet.css</code></pre>
 
         <h2 id="Example">Example</h2>
         <p>This example displays a map for Small Red-eyed Damselfly, restricted to a single dataset supplied by Dragonfly Recording Network. The map size has been increased and a 100km grid included.</p>
-        <pre><code class="prettyPrint">http://188.226.187.206:8080/EasyMap?tvk=NHMSYS0000344177&w=600&h=600&gd=100km&ds=GA000012</code></pre>
+        <pre><code class="prettyPrint">http://easymap.nbnatlas.org/EasyMap?tvk=NHMSYS0000344177&w=600&h=600&gd=100km&ds=GA000012</code></pre>
         </div>
             </div>
 <div class="developed-by">Developed for National Biodiversity Network by CEH and JNCC.</div></div>
