@@ -1,2 +1,1 @@
 0 0 * * * /usr/bin/python3 /home/ubuntu/EasyMap_Shim/cleancache.py
-@reboot   /bin/bash /home/ubuntu/EasyMap_Shim/startup.sh 
