@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
 cd /home/ubuntu/EasyMap_Shim
-sudo iptables-load < iptables.conf
+sudo iptables-restore < iptables.conf
 nohup python server.py &
 
