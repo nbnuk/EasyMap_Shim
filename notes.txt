@@ -7,7 +7,7 @@ cd EasyMap_Shim
 virtualenv ENV -p python3 --system-site-packages
 source ENV/bin/activate
 pip install tornado
-pip install requests
+pip install request
 pip install pyproj
 pip install pillow
 mkdir cache
