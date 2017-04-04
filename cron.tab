@@ -1,0 +1,2 @@
+0 0 * * * /home/ubuntu/EasyMap_Shim/cleancache.py
+@reboot   /home/ubuntu/EasyMap_Shim/loadiptables.sh 
