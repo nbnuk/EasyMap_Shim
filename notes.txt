@@ -1,9 +1,20 @@
 # Setup Notes
 
-# virtualenv ENV -p python3
-# source ENV/bin/activate
-# pip install tornado
-# pip install pyproj
-# pip install pillow
-# mkdir cache
-
+sudo apt-get update
+sudo apt-get install python-virtualenv build-essential python3-dev zlib1g-dev libjpeg-dev git fail2ban
+git clone https://github.com/DuncanRowland/NeoEasy_Shim.git
+cd EasyMap_Shim
+virtualenv ENV -p python3 --system-site-packages
+source ENV/bin/activate
+pip install tornado
+pip install pyproj
+pip install pillow
+git clone https://github.com/DuncanRowland/NeoEasy_Shim.git
+cd EasyMap_Shim/
+mkdir cache
+sudo iptables -A INPUT -i eth0 -p tcp --dport 80 -j ACCEPT
+sudo iptables -A INPUT -i eth0 -p tcp --dport 8080 -j ACCEPT
+sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to-port 8080
+sudo iptables-save > iptables.conf
+crontab cron.tab
+sudo reboot
