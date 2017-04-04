@@ -153,7 +153,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       maxtiles=200
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
       url1=False if rangeurl1=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
       url2=False if rangeurl2=='' else "https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=species_guid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
 
