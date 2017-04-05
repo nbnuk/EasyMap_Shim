@@ -10,7 +10,7 @@ from loadbboxes import bboxFor
 
 from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK
 
-from coordtransform import NE_to_EPSG27700, GR_to_EPSG27700, EPSG27700_to_EPSG4326
+from coordtransform import GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
 import tornado.httpserver
 import tornado.ioloop

@@ -7,12 +7,9 @@ EPSG27700=Proj(init='epsg:27700')
 def EPSG27700_to_EPSG4326(LL):
    return transform(EPSG27700, EPSG4326, LL[0], LL[1])
 
-def NE_to_EPSG27700(NE):
-   return transform(EPSG27700, EPSG3857, NE[0], NE[1])
-
 def GR_to_EPSG27700(GR):
    NE=GR_to_NE(GR)
-   return NE_to_EPSG27700(NE)
+   return NE
 
 #def EPSG3857_to_EPSG4326(LL):
 #   return transform(EPSG3857, EPSG4326, LL[0], LL[1])
