@@ -12,7 +12,7 @@ def NE_to_EPSG27700(NE):
 
 def GR_to_EPSG27700(GR):
    NE=GR_to_NE(GR)
-   return NE_to_EPSG3857(NE)
+   return NE_to_EPSG27700(NE)
 
 #def EPSG3857_to_EPSG4326(LL):
 #   return transform(EPSG3857, EPSG4326, LL[0], LL[1])
