@@ -295,7 +295,10 @@ def druidForDs(ds):
    return result
 
 if __name__ == "__main__":
-   https_server=tornado.httpserver.HTTPServer(application)
+   https_server = tornado.httpserver.HTTPServer(application, ssl_options={
+      "certfile": "/home/ubuntu/.keys/.cert",
+      "keyfile": "/home/ubuntu/.keys/.key",
+   })
    https_server.bind(8080)
    https_server.start(8)
    tornado.ioloop.IOLoop.current().start()
