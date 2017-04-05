@@ -299,7 +299,7 @@ if __name__ == "__main__":
       "certfile": "/home/ubuntu/.keys/.cert",
       "keyfile": "/home/ubuntu/.keys/.key",
    })
-   https_server.bind(8080)
+   https_server.bind(8443)
    https_server.start(8)
    tornado.ioloop.IOLoop.current().start()
 
