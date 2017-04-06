@@ -259,11 +259,8 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       cachedays = int(re.sub(r'[^0-9]', '', cachedays)) #sanitise
       cachedays = clamp(cachedays, 0, 31)
 
-      #Get path to cached file (reduce url to only those params that effect html)
-      ps=''
-      for p in ['title','terms','link','ref','logo','css','maponly']:
-         ps=ps+self.get_argument(p,default='X')
-      cachepath = hashToCachePath(hashlib.sha256(ps.encode('utf8')).hexdigest())
+      #Get path to cached file (use whole url incase image_url has changed)
+      cachepath = hashToCachePath(hashlib.sha256(self.request.uri.encode('utf8')).hexdigest())
 
       if (not os.path.exists(cachepath)) or (time.time()-os.path.getmtime(cachepath))>cachedays*24*60*60:
          html = self.generateHtml()
