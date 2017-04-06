@@ -61,8 +61,8 @@ class imageRequestHandler(tornado.web.RequestHandler):
          blCoord = re.sub(r'[^0-9,]', '', blCoord).split(',') #sanitise
          trCoord = re.sub(r'[^0-9,]', '', trCoord).split(',') #sanitise
          if len(blCoord)==2 and len(trCoord)==2:
-            (lon0,lat0)=NE_to_EPSG27700(blCoord)
-            (lon1,lat1)=NE_to_EPSG27700(trCoord)
+            (lon0,lat0)=(int(blCoord[0]),int(blCoord[1]))
+            (lon1,lat1)=(int(trCoord[0]),int(trCoord[1]))
 
       #Retrict the range of lat,lon and correct the order
       lon0 = clamp(lon0,bboxes['uk'][0],bboxes['uk'][2])
