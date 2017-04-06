@@ -208,8 +208,9 @@ class easymapRequestHandler(tornado.web.RequestHandler):
    def initialize(self):
       self.template_loader = tornado.template.Loader("templates")
 
-   def get(self):
+   def generateHtml(self):
       #Adjust uri to return insert image in html
+      image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
 
       #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
@@ -223,20 +224,55 @@ class easymapRequestHandler(tornado.web.RequestHandler):
          for dsk in ds.split(','):
                druidlist.append(druidForDs(dsk))
 
-      image_url = re.sub(r'/EasyMap', '/Image', self.request.uri)
+      #Title type
       title = self.get_argument('title',default='sci').lower()
       if   title=="sci": title=sciNameForTVK(tvk)
       elif title=="com": title=comNameForTVK(tvk)
       else             : title=False
+
+      #Terms and conditions
       terms = self.get_argument('terms',default='1')=='1'
+
+      #Link to interactive map
       link  = self.get_argument('link',default='1')=='1'
       if link: link='https://records.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'#tab_mapView' 
+
+      #Datasource references
       ref = self.get_argument('ref',default='1')=='1'
       if ref: ref=datasourceListForDRUIDSandTVK(druidlist,tvk)
+
+      #NBN Logo
       logo  = self.get_argument('logo',default='1')=='1'
+
+      #Link to bespoke css
       css = self.get_argument('css',default=False)
+
+      #Maponly (overrides all the above)
       if self.get_argument('maponly',default='0')=='1': title,terms,link,ref,logo,css=False,False,False,False,False,False
-      self.write(self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css))
+
+      #Include the variables in the html template
+      return self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css)
+
+   def get(self):
+      #Time after which a new image will be generated instead of cache version (0 to force generation)
+      cachedays = self.get_argument('cachedays',default='31')
+      cachedays = int(re.sub(r'[^0-9]', '', cachedays)) #sanitise
+      cachedays = clamp(cachedays, 0, 31)
+
+      #Get path to cached file (reduce url to only those params that effect html)
+      ps=''
+      for p in ['title','terms','link','ref','logo','css','maponly']:
+         ps=ps+self.get_argument(p,default='X')
+      cachepath = hashToCachePath(hashlib.sha256(ps.encode('utf8')).hexdigest())
+
+      if (not os.path.exists(cachepath)) or (time.time()-os.path.getmtime(cachepath))>cachedays*24*60*60:
+         html = self.generateHtml()
+         with open(cachepath, 'wb') as f:
+            f.write(html)
+
+      with open(cachepath,'rb') as f:
+         html = f.read()
+         self.write(html)
 
 class singlespeciesRequestHandler(tornado.web.RequestHandler):
    def get(self, tvk):
