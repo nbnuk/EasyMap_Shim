@@ -8,7 +8,7 @@ from PIL import Image
 
 from loadbboxes import bboxFor
 
-from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK
+from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK, acceptedTVKforTVK
 
 from coordtransform import GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
@@ -36,6 +36,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
+      tvk = acceptedTVKforTVK(tvk)
 
       #Vice County
       vc = self.get_argument('vc',default='')
@@ -215,6 +216,7 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
       tvk = re.sub(r'[^a-zA-Z0-9]', '', tvk) #sanitise
+      tvk = acceptedTVKforTVK(tvk)
 
       #Datasource
       ds = self.get_argument('ds',default='')

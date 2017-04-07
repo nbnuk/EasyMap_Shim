@@ -58,3 +58,18 @@ def datasourceListForDRUIDSandTVK(druids,tvk):
       if len(druids)==0 or druid in druids:
          result.append(i['label'])
    return result
+
+acceptedTVKs={}
+def acceptedTVKforTVK(tvk):
+   try:
+      result=acceptedTVKs[tvk]
+   except:
+      req = 'https://species-ws.nbnatlas.org/species/'+tvk
+      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+      obj=json.loads(rsp)
+      try:
+         result=obj['taxonConcept']['acceptedConceptID']
+      except:
+         result=tvk
+   acceptedTVKs[tvk]=result
+   return result
