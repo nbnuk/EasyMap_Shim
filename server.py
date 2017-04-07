@@ -150,7 +150,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
       #Degrees Per Tile (used to control which layer is returned by wms)
       dpt={'10km':250000,'2km':50000,'1km':25000,'100m':2500}[res]
-      maxtiles=200
+      maxtiles=50
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
       url0="https://records-dev-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
