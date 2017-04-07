@@ -11,7 +11,7 @@ def allUidForGuid():
       with open(filename,'r') as f:
          guid_to_uid=json.load(f)
    else:
-      req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=9999999&pageSize=0'
+      req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=1999&pageSize=0'
       rsp=urllib.request.urlopen(req).readall().decode('utf-8')
       obj1=json.loads(rsp)
       for i in obj1['facetResults'][0]['fieldResult']:
@@ -49,7 +49,7 @@ def comNameForTVK(tvk):
    return nameString
 
 def datasourceListForDRUIDSandTVK(druids,tvk):
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&fq=lsid:'+tvk+'&facets=data_resource_uid&flimit=9999999&pageSize=0'
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&fq=lsid:'+tvk+'&facets=data_resource_uid&flimit=1999&pageSize=0'
    rsp=urllib.request.urlopen(req).readall().decode('utf-8')
    obj=json.loads(rsp)
    result=[]
