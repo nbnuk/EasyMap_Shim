@@ -85,20 +85,21 @@ class imageRequestHandler(tornado.web.RequestHandler):
                druidurl=druidurl+'+OR+data_resource_uid:'+druidForDs(dsk)
          druidurl=druidurl+')'
 
-      #Double Resolution
-      retina = self.get_argument('retina',default='')
-      retina = re.sub(r'[^1-2]', '', retina) #sanitise
-      retina = 1 if retina=='' else int(retina)
-
       #Image Width
       w = self.get_argument('w',default='')
       w = re.sub(r'[^0-9]', '', w) #sanitise
-      w = -1 if w=='' else clamp(int(w),80,800)*retina
+      w = 0 if w=='' else clamp(int(w),80,800)
 
       #Image Height
       h = self.get_argument('h',default='')
       h = re.sub(r'[^0-9]', '', h) #sanitise
-      h = -1 if h=='' else clamp(int(h),80,800)*retina
+      h = 0 if h=='' else clamp(int(h),80,800)
+
+      #Double Resolution
+      retina = self.get_argument('retina',default='')
+      retina = re.sub(r'[^1-2]', '', retina) #sanitise
+      retina = 1 if retina=='' else int(retina)
+      (w,h) = [i*retina for i in ((350,350) if w==0 and h==0 else (w,h))]
 
       #Date Band (0)
       if self.get_argument('b0from',default=False) or self.get_argument('b0to',default=False):
