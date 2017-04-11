@@ -86,8 +86,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
          druidurl=druidurl+')'
 
       #Double Resolution
-      retina = self.get_argument('retina',default='1')
-      retina = int(re.sub(r'[^1-2]', '', retina)) #sanitise
+      retina = self.get_argument('retina',default='')
+      retina = re.sub(r'[^1-2]', '', retina) #sanitise
+      retina = 1 if retina=='' else int(retina)
 
       #Image Width
       w = self.get_argument('w',default='')
