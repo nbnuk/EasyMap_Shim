@@ -85,15 +85,19 @@ class imageRequestHandler(tornado.web.RequestHandler):
                druidurl=druidurl+'+OR+data_resource_uid:'+druidForDs(dsk)
          druidurl=druidurl+')'
 
+      #Double Resolution
+      retina = self.get_argument('retina',default='1')
+      retina = int(re.sub(r'[^1-2]', '', retina)) #sanitise
+
       #Image Width
       w = self.get_argument('w',default='')
       w = re.sub(r'[^0-9]', '', w) #sanitise
-      w = -1 if w=='' else clamp(int(w),80,800)
+      w = -1 if w=='' else clamp(int(w),80,800)*retina
 
       #Image Height
       h = self.get_argument('h',default='')
       h = re.sub(r'[^0-9]', '', h) #sanitise
-      h = -1 if h=='' else clamp(int(h),80,800)
+      h = -1 if h=='' else clamp(int(h),80,800)*retina
 
       #Date Band (0)
       if self.get_argument('b0from',default=False) or self.get_argument('b0to',default=False):
@@ -192,7 +196,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
 
       #Get path to cached file (reduce url to only those params that effect image)
       ps=''
-      for p in ['tvk','vc','zoom','bl','tr','blCoord','trCoord','ds','w','h','b0fill','b0from','b0to','b1fill','b1from','b1to','b2fill','b2from','b2to','bg','res']:
+      for p in ['tvk','vc','zoom','bl','tr','blCoord','trCoord','ds','retina','w','h','b0fill','b0from','b0to','b1fill','b1from','b1to','b2fill','b2from','b2to','bg','res']:
          ps=ps+self.get_argument(p,default='X')
       cachepath = hashToCachePath(hashlib.sha256(ps.encode('utf8')).hexdigest())
 
