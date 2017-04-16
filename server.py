@@ -258,8 +258,16 @@ class easymapRequestHandler(tornado.web.RequestHandler):
       #Maponly (overrides all the above)
       if self.get_argument('maponly',default='0')=='1': title,terms,link,ref,logo,css=False,False,False,False,False,False
 
+      #Halve Image for Double Resolution
+      retina = self.get_argument('retina',default='')
+      retina = re.sub(r'[^1-2]', '', retina) #sanitise
+      retina = retina=='2'
+
       #Include the variables in the html template
-      return self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css)
+      if retina:
+         return self.template_loader.load('retina.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css)
+      else:
+         return self.template_loader.load('standard.html').generate(image_url=image_url,title=title,terms=terms,link=link,ref=ref,logo=logo,css=css)
 
    def get(self):
       #Time after which a new image will be generated instead of cache version (0 to force generation)

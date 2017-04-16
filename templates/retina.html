@@ -1,0 +1,34 @@
+{% autoescape None %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+{% if css %}
+            <link type="text/css" rel="stylesheet" href="{{css}}">
+{% end %}
+</head>
+<body>
+    <div><span id="lblDistribution">
+{% if title %}
+            <h3>{{title}}</h3>
+{% end %}
+{% if terms %}
+            <p>The National Biodiversity Network records are shown on the map below. (See <a href="https://nbnatlas.org/help/nbn-atlas-terms-use/" target="_blank">terms and conditions</a>)</p>
+{% end %}
+        <img src="{{image_url}}" onload="this.width/=2;this.onload=null;">
+{% if link %}
+            <br>
+            <a href="{{link}}" target="_blank">Open interactive map in new window</a>
+{% end %}
+{% if ref %}
+            <p>The following datasets are included:</p>
+            {% for r in ref %}
+              <li>{{r}}</li>
+            {% end %}
+{% end %}
+{% if logo %}
+            <a href="https://nbnatlas.org/" target="_blank"><img src="NBNPower.gif"></a>
+{% end %}
+    </span></div>
+
+</body></html>
+
