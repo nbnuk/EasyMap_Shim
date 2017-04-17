@@ -62,7 +62,6 @@ def imageFor(base_url, bbox_lon0, bbox_lat0, bbox_lon1, bbox_lat1, img_width, im
           tilespecs.append({'url':url,'pos':(x, Height-TileSize-y)})
 
    #Short circuit if we are about to ask the server for too many tiles
-   print("TILES REQUEST"+str(len(tilespecs)))
    if len(tilespecs)>max_tiles: return False
 
    #Create workers to load each tile
