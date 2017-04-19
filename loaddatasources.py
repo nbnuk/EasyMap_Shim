@@ -55,7 +55,8 @@ def datasourceListForDRUIDSandTVK(druids,tvk):
    result=[]
    for i in obj['facetResults'][0]['fieldResult']:
       druid = i['fq'].split(':')[1].strip('\"')
-      if len(druids)==0 or druid in druids:
+      count = int(i['count'])
+      if (len(druids)==0 or druid in druids) and count>0:
          result.append(i['label'])
    return result
 
