@@ -1,32 +1,43 @@
 import json
 import urllib.request
 import os.path
+from simpleflock import SimpleFlock
 
 #Create and cache a lookup table for the old style data source ids
-def allUidForGuid():
-   filename='guid-to-uid.json'
+def createUidForGuidCache(filename):
    guid_to_uid={}
-
-   if os.path.exists(filename):
-      with open(filename,'r') as f:
-         guid_to_uid=json.load(f)
-   else:
-      req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=-1&pageSize=0'
-      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
-      obj1=json.loads(rsp)
-      for i in obj1['facetResults'][0]['fieldResult']:
-         druid = i['fq'].split(':')[1].strip('\"')
-         req = 'https://registry.nbnatlas.org/ws/dataResource/'+druid
-         try:
-            rsp=urllib.request.urlopen(req).readall().decode('utf-8')
-            obj2 = json.loads(rsp)
-            guid_to_uid[obj2['guid']]=obj2['uid']
-         except:
-            pass
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=-1&pageSize=0'
+   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   obj1=json.loads(rsp)
+   for i in obj1['facetResults'][0]['fieldResult']:
+      druid = i['fq'].split(':')[1].strip('\"')
+      req = 'https://registry.nbnatlas.org/ws/dataResource/'+druid
+      try:
+         rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+         obj2 = json.loads(rsp)
+         guid_to_uid[obj2['guid']]=obj2['uid']
+      except:
+         pass
+   with SimpleFlock(filename+'.lock'):
       with open(filename,'w') as f:
          json.dump(guid_to_uid,f)
 
-   return guid_to_uid
+#Load (cached) data source table. If old datasource cannot be found, assume it's a new druid
+_druid=None
+_druid_mtime=-1
+def druidForDs(ds):
+   global _druid, _druid_mtime
+   cachefilename='guid-to-uid.json'
+   if(os.path.getmtime(cachefilename)!=_druid_mtime):
+      _druid_mtime=os.path.getmtime(cachefilename)
+      with SimpleFlock(cachefilename+'.lock'):
+         with open(cachefilename,'r') as f:
+            _druid=json.load(f)
+   try:
+      result=_druid[ds]
+   except:
+      result=ds
+   return result
 
 def sciNameForTVK(tvk):
    req = 'https://species-ws.nbnatlas.org/species/'+tvk

@@ -8,7 +8,7 @@ from PIL import Image
 
 from loadbboxes import bboxFor
 
-from loaddatasources import allUidForGuid, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK, acceptedTVKforTVK
+from loaddatasources import druidForDs, sciNameForTVK, comNameForTVK, datasourceListForDRUIDSandTVK, acceptedTVKforTVK
 
 from coordtransform import GR_to_EPSG27700, EPSG27700_to_EPSG4326
 
@@ -333,15 +333,6 @@ bboxes.update({'highland':(93577.9965802757, 729630.9703185001, 355677.528471506
 bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.5048700813, 980750.1340887807)})
 bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
-
-#Load (cached) data source table. If old datasource cannot be be, assume it's a new druid
-druid=allUidForGuid()
-def druidForDs(ds):
-   try:
-      result=druid[ds]
-   except:
-      result=ds
-   return result
 
 if __name__ == "__main__":
    https_server = tornado.httpserver.HTTPServer(application, ssl_options={
