@@ -14,5 +14,5 @@ for filepath in cachefiles:
    if (now-getmtime(filepath))>old:
       remove(filepath)      
 
-createUidForGuidCache('guid-to-uid.json')
+createUidForGuidCache('/home/ubuntu/EasyMap_Shim/guid-to-uid.json')
 
