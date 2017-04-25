@@ -18,7 +18,7 @@ def createUidForGuidCache(filename):
          guid_to_uid[obj2['guid']]=obj2['uid']
       except:
          pass
-   with SimpleFlock(filename+'.lock'):
+   with SimpleFlock(filename+'.lock', 10):
       with open(filename,'w') as f:
          json.dump(guid_to_uid,f)
 
@@ -30,7 +30,7 @@ def druidForDs(ds):
    cachefilename='guid-to-uid.json'
    if(os.path.getmtime(cachefilename)!=_druid_mtime):
       _druid_mtime=os.path.getmtime(cachefilename)
-      with SimpleFlock(cachefilename+'.lock'):
+      with SimpleFlock(cachefilename+'.lock', 10):
          with open(cachefilename,'r') as f:
             _druid=json.load(f)
    try:
