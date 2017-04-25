@@ -19,4 +19,5 @@ sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 443 -j REDIRECT --to-p
 sudo iptables-save > iptables.conf
 crontab cron.tab
 echo Edit /etc/rc.local and add: su ubuntu -c /home/ubuntu/EasyMap_Shim/startup.sh
+echo Setup cache /usr/bin/python3 /home/ubuntu/EasyMap_Shim/updatecaches.py
 echo And then: sudo reboot
