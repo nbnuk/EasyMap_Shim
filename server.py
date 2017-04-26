@@ -338,6 +338,7 @@ if __name__ == "__main__":
    https_server = tornado.httpserver.HTTPServer(application, ssl_options={
       "certfile": "/home/ubuntu/.keys/.cert",
       "keyfile": "/home/ubuntu/.keys/.key",
+      "ca_certs": "/home/ubuntu/.keys/.intr"
    })
    https_server.bind(8443)
    https_server.start(8)
