@@ -160,9 +160,9 @@ class imageRequestHandler(tornado.web.RequestHandler):
       maxtiles=50
 
       urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=*:*&fq=lsid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url0="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl0+"&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url1=False if rangeurl1=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl1+"&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      url2=False if rangeurl2=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl2+"&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       
@@ -176,7 +176,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (w,h)=imgBase.size
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=*:*&fq=lsid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -335,6 +335,7 @@ bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.859963
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
 
 if __name__ == "__main__":
+#   https_server = tornado.httpserver.HTTPServer(application)
    https_server = tornado.httpserver.HTTPServer(application, ssl_options={
       "certfile": "/home/ubuntu/.keys/.cert",
       "keyfile": "/home/ubuntu/.keys/.key",
