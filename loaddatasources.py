@@ -6,14 +6,14 @@ from simpleflock import SimpleFlock
 #Create and cache a lookup table for the old style data source ids
 def createUidForGuidCache(filename):
    guid_to_uid={}
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&facets=data_resource_uid&flimit=-1&pageSize=0'
-   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
+   rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj1=json.loads(rsp)
    for i in obj1['facetResults'][0]['fieldResult']:
       druid = i['fq'].split(':')[1].strip('\"')
       req = 'https://registry.nbnatlas.org/ws/dataResource/'+druid
       try:
-         rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+         rsp=urllib.request.urlopen(req).read().decode('utf-8')
          obj2 = json.loads(rsp)
          guid_to_uid[obj2['guid']]=obj2['uid']
       except:
@@ -41,7 +41,7 @@ def druidForDs(ds):
 
 def sciNameForTVK(tvk):
    req = 'https://species-ws.nbnatlas.org/species/'+tvk
-   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj=json.loads(rsp)
    try:
       nameString=obj['taxonConcept']['nameString']
@@ -51,7 +51,7 @@ def sciNameForTVK(tvk):
 
 def comNameForTVK(tvk):
    req = 'https://species-ws.nbnatlas.org/species/'+tvk
-   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj=json.loads(rsp)
    try:
       nameString=obj['commonNames'][0]['nameString']
@@ -60,8 +60,8 @@ def comNameForTVK(tvk):
    return nameString
 
 def datasourceListForDRUIDSandTVK(druids,tvk):
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'&facets=data_resource_uid&flimit=-1&pageSize=0'
-   rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
+   rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj=json.loads(rsp)
    result=[]
    for i in obj['facetResults'][0]['fieldResult']:
@@ -77,7 +77,7 @@ def acceptedTVKforTVK(tvk):
       result=acceptedTVKs[tvk]
    except:
       req = 'https://species-ws.nbnatlas.org/species/'+tvk
-      rsp=urllib.request.urlopen(req).readall().decode('utf-8')
+      rsp=urllib.request.urlopen(req).read().decode('utf-8')
       obj=json.loads(rsp)
       try:
          result=obj['taxonConcept']['acceptedConceptID']

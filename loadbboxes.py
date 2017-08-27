@@ -8,7 +8,7 @@ def bboxFor(url):
    def splitOnSpace(x):
       return x.split(' ')
    bboxes={}
-   rsp=urllib.request.urlopen(url).readall().decode('utf-8')
+   rsp=urllib.request.urlopen(url).read().decode('utf-8')
    obj=json.loads(rsp)
    for rec in obj:
       bbox=re.sub(r'[^\-0-9., ]', '', rec['bbox'])
