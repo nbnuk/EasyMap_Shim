@@ -64,11 +64,15 @@ def datasourceListForDRUIDSandTVK(druids,tvk):
    rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj=json.loads(rsp)
    result=[]
-   for i in obj['facetResults'][0]['fieldResult']:
-      druid = i['fq'].split(':')[1].strip('\"')
-      count = int(i['count'])
-      if (len(druids)==0 or druid in druids) and count>0:
-         result.append(i['label'])
+   try:
+      #facetResults is empty if no records (obj['totalRecords']==0)
+      for i in obj['facetResults'][0]['fieldResult']:
+         druid = i['fq'].split(':')[1].strip('\"')
+         count = int(i['count'])
+         if (len(druids)==0 or druid in druids) and count>0:
+            result.append(i['label'])
+   except:
+      result=[]
    return result
 
 acceptedTVKs={}
