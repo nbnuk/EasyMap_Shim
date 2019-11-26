@@ -1,0 +1,17 @@
+
+.idea/misc.xml
+*.xml
+*.pyc
+EasyMap_Shim.iml
+errs.log
+httpredirectserver.py
+httpredirectserver.py
+*.github
+httpredirectserver.py
+loadimage.py
+server.py
+httpredirectserver.py
+startup.sh
+.DS_Store
+cache*
+venv*

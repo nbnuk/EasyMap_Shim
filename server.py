@@ -23,6 +23,10 @@ import time
 
 def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
+layers_service_url = "https://layers.nbnatlas.org"
+biocache_service_url = "https://records-ws.nbnatlas.org"
+   #"http://localhost:8081"
+
 def hashToCachePath(hash):
    cachepath='cache/'+hash[0:2]+'/'+hash[2:4]+'/'+hash[4:]
    os.makedirs('/'.join(cachepath.split('/')[0:2]),exist_ok=True)
@@ -154,29 +158,32 @@ class imageRequestHandler(tornado.web.RequestHandler):
 
       #Resolution (10km - use tiles, 2km, 1km, 100m render using static image service circles)
       res = self.get_argument('res',default='').lower()
-      if not (res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
+      if not (res=='50km' or res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
+      map_grid_size = self.get_argument('res',default='').lower()
+      if not (map_grid_size=='50km' or map_grid_size=='10km' or map_grid_size=='2km' or map_grid_size=='1km' or map_grid_size=='100m'): map_grid_size='singlegrid'
+      map_grid_size='fixed_' + map_grid_size
       #Degrees Per Tile (used to control which layer is returned by wms)
-      dpt={'10km':250000,'2km':50000,'1km':25000,'100m':2500}[res]
+      dpt={'50km':1250000,'10km':250000,'2km':50000,'1km':25000,'100m':2500}[res]
       maxtiles=50
 
-      urlBase="https://layers.nbnatlas.org/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0="https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl0+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url1=False if rangeurl1=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl1+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
-      url2=False if rangeurl2=='' else "https://records-ws.nbnatlas.org/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl2+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:singlegrid"
+      urlBase=layers_service_url + "/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
+      url0=biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl0+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
+      url1=False if rangeurl1=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl1+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
+      url2=False if rangeurl2=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl2+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
 
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       
       imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
       if not imgLayer: #If failed to get an image layer, probably too many tiles requested. Fall back to a 'mapping' url
          #At dpi=254, 1 inch=25.4mm (defined), dpmm=dpi/i/mm dpmm=254/1/25.4=10, so 1mm=10pixels for width and height
-         radius={'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0) #radius (grid /20 [/2 for radius 1mm=10px])*imgwidth(px)/worldwidth(m)
+         radius={'50km':2500,'10km':500,'2km':100,'1km':50,'100m':5}[res]*w/(lon1-lon0) #radius (grid /20 [/2 for radius 1mm=10px])*imgwidth(px)/worldwidth(m)
          radius=str(radius) if radius>=0.1 else "0.1" #radius<0.1mm are not drawn by the mapping service
          (lon0,lat0)=EPSG27700_to_EPSG4326((lon0,lat0))
          (lon1,lat1)=EPSG27700_to_EPSG4326((lon1,lat1))
          (w,h)=imgBase.size
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = "https://records-ws.nbnatlas.org/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -343,5 +350,7 @@ if __name__ == "__main__":
    })
    https_server.bind(8443)
    https_server.start(8)
+# dev version:
+#http_server.listen(8888, address='127.0.0.1')
    tornado.ioloop.IOLoop.current().start()
 
