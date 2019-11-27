@@ -183,7 +183,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (w,h)=imgBase.size
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)
+         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)+"&baselayerStyle=thin_outline_polygon"
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -342,15 +342,16 @@ bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.859963
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
 
 if __name__ == "__main__":
-#   https_server = tornado.httpserver.HTTPServer(application)
-   https_server = tornado.httpserver.HTTPServer(application, ssl_options={
-      "certfile": "/home/ubuntu/.keys/.cert",
-      "keyfile": "/home/ubuntu/.keys/.key",
-      "ca_certs": "/home/ubuntu/.keys/.intr"
-   })
-   https_server.bind(8443)
-   https_server.start(8)
+#   https_server = tornado.httpserver.HTTPServer(application, ssl_options={
+#      "certfile": "/home/ubuntu/.keys/.cert",
+#      "keyfile": "/home/ubuntu/.keys/.key",
+#      "ca_certs": "/home/ubuntu/.keys/.intr"
+#   })
+#   https_server.bind(8443)
+#   https_server.start(8)
+#   tornado.ioloop.IOLoop.current().start()
 # dev version:
-#http_server.listen(8888, address='127.0.0.1')
+   http_server = tornado.httpserver.HTTPServer(application)
+   http_server.listen(8888, address='127.0.0.1')
    tornado.ioloop.IOLoop.current().start()
 
