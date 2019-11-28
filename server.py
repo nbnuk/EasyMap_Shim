@@ -181,9 +181,14 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (lon0,lat0)=EPSG27700_to_EPSG4326((lon0,lat0))
          (lon1,lat1)=EPSG27700_to_EPSG4326((lon1,lat1))
          (w,h)=imgBase.size
+
+         res_supplied = self.get_argument('res',default='').lower()
+         if not (res_supplied=='50km' or res_supplied=='10km' or res_supplied=='2km' or res_supplied=='1km' or res_supplied=='100m'): res_supplied='*'
+         ref_filter={'50km':'grid_ref_50000','10km':'grid_ref_10000','2km':'grid_ref_2000','1km':'grid_ref_1000','100m':'grid_ref_100','*':'*'}[res_supplied]
+
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)+"&baselayerStyle=thin_outline_polygon"
+         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&fq="+ref_filter+":*&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)+"&baselayerStyle=thin_outline_polygon"
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
