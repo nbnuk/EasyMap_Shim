@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 #delete following on refactor
+import html
 import urllib.request
 import io
 
@@ -20,12 +21,15 @@ import hashlib
 import re
 import os
 import time
+from os import remove
 
 def clamp(n, smallest, largest): return max(smallest, min(n, largest))
 
 layers_service_url = "https://layers.nbnatlas.org"
 biocache_service_url = "https://records-ws.nbnatlas.org"
    #"http://localhost:8081"
+
+recs_in_latest_query = True
 
 def hashToCachePath(hash):
    cachepath='cache/'+hash[0:2]+'/'+hash[2:4]+'/'+hash[4:]
@@ -36,6 +40,7 @@ def hashToCachePath(hash):
 class imageRequestHandler(tornado.web.RequestHandler):
 
    def generateImage(self):
+      global recs_in_latest_query
       
       #TaxonVersionKey (required)
       tvk = self.get_argument('tvk')
@@ -154,23 +159,56 @@ class imageRequestHandler(tornado.web.RequestHandler):
          rangeurl2 = ''
 
       #Base map (os TBD after conversion to 27700)
-      basemap = 'county_coastal_terrestrial_region' if self.get_argument('bg',default='').lower()=='vc' else 'world'
+      #basemap = 'county_coastal_terrestrial_region' if self.get_argument('bg',default='').lower()=='vc' else 'world'
+      basemap = 'world'
+      if self.get_argument('bg',default='').lower()=='vc': basemap = 'county_coastal_terrestrial_region'
+      if self.get_argument('bg',default='').lower()=='nationalparks': basemap = 'national_park'
+
+      colormode = 'osgrid'
+      #if self.get_argument('colormode',default='').lower()=='taxon_name': colormode = 'taxon_name'
+      #doesn't work
+      another_filter = ''
+      #if self.get_argument('fq',default='').lower()!='': another_filter = '&fq=' + self.get_argument('fq',default='').replace('"', r'\"') #html.escape(
+      #doesn't work
 
       #Resolution (10km - use tiles, 2km, 1km, 100m render using static image service circles)
-      res = self.get_argument('res',default='').lower()
+      res = self.get_argument('res', default='').lower()
       if not (res=='50km' or res=='10km' or res=='2km' or res=='1km' or res=='100m'): res='10km'
-      map_grid_size = self.get_argument('res',default='').lower()
+      map_grid_size = self.get_argument('res', default='').lower()
       if not (map_grid_size=='50km' or map_grid_size=='10km' or map_grid_size=='2km' or map_grid_size=='1km' or map_grid_size=='100m'): map_grid_size='singlegrid'
       map_grid_size='fixed_' + map_grid_size
+
+      #remote_ip = self.request.headers.get("X-Real-IP") or \
+      #            self.request.headers.get("X-Forwarded-For") or \
+      #            self.request.remote_ip
+      #print(remote_ip)
+      #this doesn't work because the remote ip is actually the user's machine; it doesn't get routed via the 3rd party website at all
+
       #Degrees Per Tile (used to control which layer is returned by wms)
       dpt={'50km':1250000,'10km':250000,'2km':50000,'1km':25000,'100m':2500}[res]
       maxtiles=50
 
-      urlBase=layers_service_url + "/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
-      url0=biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl0+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
-      url1=False if rangeurl1=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl1+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
-      url2=False if rangeurl2=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl2+"&fq=-occurrence_status:absent&ENV=colourmode:osgrid;color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size
 
+
+      urlBase=layers_service_url + "/geoserver/ALA/wms?layers=ALA:"+basemap+"&styles=ALA:borders_only"
+      url0=biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl0+"&fq=-occurrence_status:absent&ENV=colourmode:"+colormode+";color:"+b0fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size+another_filter
+      url1=False if rangeurl1=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl1+"&fq=-occurrence_status:absent&ENV=colourmode:"+colormode+";color:"+b1fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size+another_filter
+      url2=False if rangeurl2=='' else biocache_service_url + "/ogc/wms/reflect?q=lsid:"+tvk+druidurl+rangeurl2+"&fq=-occurrence_status:absent&ENV=colourmode:"+colormode+";color:"+b2fill+";opacity:0.8;gridlabels:false;gridres:"+map_grid_size+another_filter
+      print(url0)
+      url_recCount=biocache_service_url + "/occurrences/search?q=lsid:"+tvk+druidurl+rangeurl0+"&fq=-occurrence_status:absent&pageSize=0"
+      recs_in_latest_query = False
+      try:
+         with urllib.request.urlopen(url_recCount) as req:
+            recCountJSON = req.read().decode('utf-8')
+            intTotalRecordsStartPos = recCountJSON.find('totalRecords')
+            if(intTotalRecordsStartPos > 0):
+               intTotalRecsFirstDigit = recCountJSON[intTotalRecordsStartPos+14:intTotalRecordsStartPos+15]
+               if(intTotalRecsFirstDigit != '0'):
+                  recs_in_latest_query = True
+      except:
+         print("Unexpected error querying: " + url_recCount)
+
+      #print(recs_in_latest_query)
       imgBase = imageFor(urlBase, lon0, lat0, lon1, lat1, w, h, 0, 1)
       
       imgLayer=imageFor(url0, lon0, lat0, lon1, lat1, w, h, dpt, maxtiles)
@@ -183,12 +221,15 @@ class imageRequestHandler(tornado.web.RequestHandler):
          (w,h)=imgBase.size
 
          res_supplied = self.get_argument('res',default='').lower()
+         #if (remote_ip == '77.72.204.7' and self.get_argument('res', default='') == ''):
+         #   res_supplied='50km'
          if not (res_supplied=='50km' or res_supplied=='10km' or res_supplied=='2km' or res_supplied=='1km' or res_supplied=='100m'): res_supplied='*'
          ref_filter={'50km':'grid_ref_50000','10km':'grid_ref_10000','2km':'grid_ref_2000','1km':'grid_ref_1000','100m':'grid_ref_100','*':'*'}[res_supplied]
 
          #druid and range currently broken in api, awaiting fix (...+tvk+druidurl+rangeurl0+...)
          #TODO. Alg should probably be no transparancy in layers then blend in basemap last
-         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&fq="+ref_filter+":*&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)+"&baselayerStyle=thin_outline_polygon"
+         #TODO: colormode?
+         url = biocache_service_url + "/mapping/wms/image?baselayer="+basemap+"&format=png&pcolour="+b0fill+"&scale=off&popacity=0.8&q=lsid:"+tvk+"&fq=-occurrence_status:absent&fq="+ref_filter+":*&extents="+str(lon0)+","+str(lat0)+","+str(lon1)+","+str(lat1)+"&outline=true&outlineColour=0x000000&pradiusmm="+radius+"&dpi=254&widthmm="+str(w/10)+"&baselayerStyle=thin_outline_polygon"+another_filter
          with urllib.request.urlopen(url) as req:
             f = io.BytesIO(req.read())
          imgLayer = Image.open(f).resize(imgBase.size, Image.NEAREST)
@@ -203,6 +244,7 @@ class imageRequestHandler(tornado.web.RequestHandler):
       return imgResult
    
    def get(self):
+      global recs_in_latest_query
       #Time after which a new image will be generated instead of cache version (0 to force generation)
       cachedays = self.get_argument('cachedays',default='31')
       cachedays = int(re.sub(r'[^0-9]', '', cachedays)) #sanitise
@@ -214,14 +256,25 @@ class imageRequestHandler(tornado.web.RequestHandler):
          ps=ps+self.get_argument(p,default='X')
       cachepath = hashToCachePath(hashlib.sha256(ps.encode('utf8')).hexdigest())
 
+      image_just_generated = False
       if (not os.path.exists(cachepath)) or (time.time()-os.path.getmtime(cachepath))>cachedays*24*60*60:
          img = self.generateImage()
          img.save(cachepath, 'PNG' )
+         image_just_generated = True
 
       self.set_header("Content-type",  "image/png")
       with open(cachepath,'rb') as f:
          data = f.read()
          self.write(data)
+
+      #remove empty map, since this could be a temporary server glitch
+      #print(str(image_just_generated) + " " + str(recs_in_latest_query))
+      if(image_just_generated and not recs_in_latest_query):
+         try:
+            remove(cachepath)
+            print("Deleted with no records: " + cachepath)
+         except:
+            print("Failed to remove " + cachepath)
 
 class easymapRequestHandler(tornado.web.RequestHandler):
    def initialize(self):
@@ -345,6 +398,13 @@ bboxes.update({'highland':(93577.9965802757, 729630.9703185001, 355677.528471506
 bboxes.update({'sco-mainland':(103066.330659948, 528916.0590681977, 424224.5048700813, 980750.1340887807)})
 bboxes.update({'outer-heb':(-8318.900640988548, 770045.3385805918, 163674.85996340276, 974137.3791137969)})
 bboxes.update({'uk':(-236382.64339983894, -16505.0236, 681196.3657, 1240275.0454)})
+bboxes.update({'yorkshire-dales':(357569.6, 450627.9, 415614.5, 519446.3)})
+#add for yorkshire dales. Coords seem to be bl easting,northing -> tr easting,northing
+# bl -2.64779977955992 53.9541062472075,
+# tl-2.64779977955992 54.5690003920196,
+# tr -1.76083171859434 54.5690003920196,
+# br -1.76083171859434 53.9541062472075
+
 
 if __name__ == "__main__":
 #   https_server = tornado.httpserver.HTTPServer(application, ssl_options={
