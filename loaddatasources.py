@@ -6,7 +6,7 @@ from simpleflock import SimpleFlock
 #Create and cache a lookup table for the old style data source ids
 def createUidForGuidCache(filename):
    guid_to_uid={}
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=*:*&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
+   req = 'http://localhost:8081/occurrences/search?q=*:*&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
    rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj1=json.loads(rsp)
    for i in obj1['facetResults'][0]['fieldResult']:
@@ -60,10 +60,12 @@ def comNameForTVK(tvk):
    return nameString
 
 def datasourceListForDRUIDSandTVK(druids,tvk):
-   req = 'http://records-ws.nbnatlas.org/occurrences/search?q=lsid:'+tvk+'&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
+   req = 'http://localhost:8081/occurrences/search?q=lsid:'+tvk+'&fq=-occurrence_status:absent&facets=data_resource_uid&flimit=-1&pageSize=0'
    rsp=urllib.request.urlopen(req).read().decode('utf-8')
    obj=json.loads(rsp)
    result=[]
+   if obj['totalRecords'] == 0:
+      result.append('-No datasets-')
    try:
       #facetResults is empty if no records (obj['totalRecords']==0)
       for i in obj['facetResults'][0]['fieldResult']:
@@ -72,7 +74,7 @@ def datasourceListForDRUIDSandTVK(druids,tvk):
          if (len(druids)==0 or druid in druids) and count>0:
             result.append(i['label'])
    except:
-      result=[]
+      pass
    return result
 
 acceptedTVKs={}
